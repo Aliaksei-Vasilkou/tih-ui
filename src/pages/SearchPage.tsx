@@ -4,14 +4,14 @@ import SearchResults from '@/components/search/SearchResults'
 import FilterPanel from '@/components/common/FilterPanel'
 import BatchUpload from '@/components/common/BatchUpload'
 import { useFilterStore } from '@/store/filterStore'
+import { useUIStore } from '@/store/uiStore'
 import { useSearch } from '@/hooks/useSearch'
-import { Upload, X } from 'lucide-react'
 
 export default function SearchPage() {
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
-  const [showUpload, setShowUpload] = useState(false)
   const { selectedLanguageId, selectedCategoryId } = useFilterStore()
+  const { showUpload } = useUIStore()
 
   const { data, isLoading, isError } = useSearch(
     query,
@@ -28,20 +28,7 @@ export default function SearchPage() {
   return (
     <div className="space-y-5">
       {/* Search bar */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
-          <SearchBox value={query} onChange={handleQueryChange} />
-        </div>
-        <button
-          onClick={() => setShowUpload((v) => !v)}
-          title="Batch upload"
-          className="flex items-center gap-1.5 px-3 py-3 border border-gray-300 rounded-xl
-                     text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
-        >
-          {showUpload ? <X className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
-          <span className="hidden sm:block text-sm">{showUpload ? 'Close' : 'Import'}</span>
-        </button>
-      </div>
+      <SearchBox value={query} onChange={handleQueryChange} />
 
       {/* Batch upload panel */}
       {showUpload && (
