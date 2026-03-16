@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { questionsApi } from '@/api/questions'
 import type { BatchUploadResponse } from '@/types'
-import { UploadCloud, FileJson, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { UploadCloud, FileJson, CheckCircle2, XCircle, SkipForward, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function BatchUpload() {
@@ -38,6 +38,8 @@ export default function BatchUpload() {
     maxFiles: 1,
     disabled: mutation.isPending,
   })
+
+  const allOk = result && result.failureCount === 0 && result.skippedCount === 0
 
   return (
     <div className="space-y-4">
@@ -78,6 +80,7 @@ export default function BatchUpload() {
         <pre className="mt-2 bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto">
 {`[
   {
+    "externalId": "optional-uuid-for-dedup",
     "questionText": "What is polymorphism?",
     "answerContent": "<p>Polymorphism is…</p>",
     "languageCode": "java",
@@ -89,24 +92,47 @@ export default function BatchUpload() {
 
       {/* Result */}
       {result && (
-        <div className={clsx(
-          'rounded-xl border p-4 space-y-2',
-          result.failureCount === 0
-            ? 'bg-green-50 border-green-200'
-            : 'bg-yellow-50 border-yellow-200',
-        )}>
+        <div
+          className={clsx(
+            'rounded-xl border p-4 space-y-3',
+            allOk
+              ? 'bg-green-50 border-green-200'
+              : 'bg-yellow-50 border-yellow-200',
+          )}
+        >
+          {/* Summary row */}
           <div className="flex items-center gap-2 font-medium">
-            {result.failureCount === 0
+            {allOk
               ? <CheckCircle2 className="w-5 h-5 text-green-600" />
               : <XCircle className="w-5 h-5 text-yellow-600" />}
             <span>
-              {result.successCount} / {result.totalItems} imported successfully
+              {result.successCount} of {result.totalItems} imported
+              {result.skippedCount > 0 && `, ${result.skippedCount} skipped`}
+              {result.failureCount > 0 && `, ${result.failureCount} failed`}
             </span>
           </div>
+
+          {/* Errors */}
           {result.errors.length > 0 && (
-            <ul className="text-sm text-red-600 list-disc list-inside space-y-0.5 max-h-40 overflow-y-auto">
-              {result.errors.map((e, i) => <li key={i}>{e}</li>)}
-            </ul>
+            <div>
+              <p className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-1">Errors</p>
+              <ul className="text-sm text-red-600 list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto">
+                {result.errors.map((e, i) => <li key={i}>{e}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {/* Skipped */}
+          {result.skipped && result.skipped.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">
+                <SkipForward className="w-3.5 h-3.5" />
+                Skipped (already exist)
+              </div>
+              <ul className="text-sm text-amber-700 list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto">
+                {result.skipped.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
           )}
         </div>
       )}

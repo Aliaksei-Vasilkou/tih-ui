@@ -73,7 +73,17 @@ export interface BatchUploadResponse {
   totalItems: number
   successCount: number
   failureCount: number
+  skippedCount: number
   errors: string[]
+  skipped: string[]
+}
+
+export interface QuestionExportItem {
+  externalId: string
+  questionText: string
+  answerContent: string
+  languageCode: string
+  categoryName: string
 }
 
 // ──────────────────────────────────────────────

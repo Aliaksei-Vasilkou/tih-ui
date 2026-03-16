@@ -47,4 +47,21 @@ export const questionsApi = {
       })
       .then(unwrap<BatchUploadResponse>)
   },
+
+  batchExport: (params?: { languageCode?: string; categoryName?: string }) =>
+    apiClient
+      .get('/batch/export', { params, responseType: 'blob' })
+      .then((response) => {
+        const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }))
+        const disposition = response.headers['content-disposition'] as string | undefined
+        const filenameMatch = disposition?.match(/filename="?([^";\n]+)"?/)
+        const filename = filenameMatch?.[1] ?? 'questions-export.json'
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }),
 }
