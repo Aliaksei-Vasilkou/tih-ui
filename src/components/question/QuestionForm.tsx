@@ -6,7 +6,9 @@ import { categoriesApi } from '@/api/categories'
 import { questionsApi } from '@/api/questions'
 import type { Question, QuestionCreateRequest, Language, Category } from '@/types'
 import RichTextEditor from '@/components/editor/RichTextEditor'
-import { Loader2 } from 'lucide-react'
+import ManageLanguagesModal from '@/components/common/ManageLanguagesModal'
+import ManageCategoriesModal from '@/components/common/ManageCategoriesModal'
+import { Loader2, Settings2 } from 'lucide-react'
 
 interface QuestionFormProps {
   initialData?: Question
@@ -22,6 +24,8 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
   const [languageId, setLanguageId] = useState<number | ''>(initialData?.languageId ?? '')
   const [categoryId, setCategoryId] = useState<number | ''>(initialData?.categoryId ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showManageLangs, setShowManageLangs] = useState(false)
+  const [showManageCats, setShowManageCats] = useState(false)
 
   const { data: languages = [] as Language[] } = useQuery({
     queryKey: ['languages'],
@@ -94,9 +98,19 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
       {/* Language & Category */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Language <span className="text-red-500">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Language <span className="text-red-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowManageLangs(true)}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary-600 transition-colors"
+              title="Manage languages"
+            >
+              <Settings2 className="w-3.5 h-3.5" /> Manage
+            </button>
+          </div>
           <select
             value={languageId}
             onChange={(e) => setLanguageId(e.target.value ? Number(e.target.value) : '')}
@@ -114,9 +128,20 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category <span className="text-red-500">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowManageCats(true)}
+              disabled={!languageId}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              title="Manage categories"
+            >
+              <Settings2 className="w-3.5 h-3.5" /> Manage
+            </button>
+          </div>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : '')}
@@ -170,6 +195,16 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
           Cancel
         </button>
       </div>
+
+      {showManageLangs && (
+        <ManageLanguagesModal onClose={() => setShowManageLangs(false)} />
+      )}
+      {showManageCats && (
+        <ManageCategoriesModal
+          initialLanguageId={languageId || undefined}
+          onClose={() => setShowManageCats(false)}
+        />
+      )}
     </form>
   )
 }

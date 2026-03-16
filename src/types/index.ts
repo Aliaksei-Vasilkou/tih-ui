@@ -6,7 +6,6 @@ export interface Language {
   id: number
   name: string
   code: string
-  active: boolean
   createdAt: string
   updatedAt: string
   createdBy: string
@@ -18,7 +17,6 @@ export interface Category {
   languageId: number
   languageName: string
   languageCode: string
-  active: boolean
   createdAt: string
   updatedAt: string
   createdBy: string
@@ -33,7 +31,6 @@ export interface Question {
   languageCode: string
   categoryId: number
   categoryName: string
-  active: boolean
   createdAt: string
   updatedAt: string
   createdBy: string
