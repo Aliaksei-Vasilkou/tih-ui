@@ -149,6 +149,15 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
 
         {/* Highlight colour */}
         <span className="text-xs text-gray-500 mr-1">Highlight:</span>
+        <button
+          type="button"
+          title="Remove highlight"
+          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetHighlight().run() }}
+          className="w-5 h-5 rounded border-2 border-gray-300 bg-white flex items-center
+                     justify-center text-gray-400 text-xs hover:border-gray-500 transition-colors"
+        >
+          ✕
+        </button>
         {HIGHLIGHT_COLORS.map((color) => (
           <button
             key={color.value}
