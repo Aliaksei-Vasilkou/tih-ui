@@ -22,10 +22,10 @@ export default function QuestionCard({ question }: QuestionCardProps) {
       tabIndex={0}
       onClick={() => navigate(`/questions/${question.id}`)}
       onKeyDown={(e) => e.key === 'Enter' && navigate(`/questions/${question.id}`)}
-      className="bg-white rounded-xl border border-gray-200 p-4 hover:border-primary-400
+      className="bg-white rounded-xl border border-gray-200 px-4 py-3 hover:border-primary-500
                  hover:shadow-md transition-all cursor-pointer group"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <p className="text-gray-900 font-medium leading-snug group-hover:text-primary-700 transition-colors">
           {question.questionText}
         </p>
@@ -38,14 +38,6 @@ export default function QuestionCard({ question }: QuestionCardProps) {
           </span>
         </div>
       </div>
-      {question.answerContent && (
-        <p
-          className="mt-2 text-sm text-gray-500 line-clamp-2"
-          dangerouslySetInnerHTML={{
-            __html: question.answerContent.replace(/<[^>]*>/g, ' ').slice(0, 200),
-          }}
-        />
-      )}
     </div>
   )
 }

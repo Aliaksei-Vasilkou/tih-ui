@@ -4,12 +4,13 @@ import Highlight from '@tiptap/extension-highlight'
 import TextStyle from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import Underline from '@tiptap/extension-underline'
+import { Markdown } from 'tiptap-markdown'
 import EditorToolbar from './EditorToolbar'
 import clsx from 'clsx'
 
 interface RichTextEditorProps {
   content: string
-  onChange: (html: string) => void
+  onChange: (value: string) => void
   placeholder?: string
   readOnly?: boolean
   className?: string
@@ -29,11 +30,16 @@ export default function RichTextEditor({
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
+      Markdown.configure({
+        html: true,                // allow inline HTML (e.g. colour spans) in Markdown
+        transformPastedText: true,
+        transformCopiedText: true,
+      }),
     ],
     content,
     editable: !readOnly,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      onChange(editor.storage.markdown.getMarkdown())
     },
     editorProps: {
       attributes: {
@@ -46,7 +52,7 @@ export default function RichTextEditor({
   return (
     <div
       className={clsx(
-        'rounded-lg border border-gray-300 bg-white overflow-hidden',
+        'rounded-lg border border-gray-300 bg-white',
         !readOnly && 'focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-primary-500',
         className,
       )}

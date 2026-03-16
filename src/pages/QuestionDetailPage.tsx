@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { questionsApi } from '@/api/questions'
-import RichTextEditor from '@/components/editor/RichTextEditor'
+import MarkdownViewer from '@/components/common/MarkdownViewer'
 import { ArrowLeft, Pencil, Trash2, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -56,7 +56,7 @@ export default function QuestionDetailPage() {
   const langColor = LANGUAGE_COLORS[question.languageCode] ?? 'bg-gray-100 text-gray-700'
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Back + actions */}
       <div className="flex items-center justify-between">
         <button
@@ -107,11 +107,7 @@ export default function QuestionDetailPage() {
         {/* Answer */}
         <div className="px-6 py-5">
           {question.answerContent ? (
-            <RichTextEditor
-              content={question.answerContent}
-              onChange={() => {}}
-              readOnly
-            />
+            <MarkdownViewer content={question.answerContent} />
           ) : (
             <p className="text-gray-400 italic">No answer added yet.</p>
           )}
