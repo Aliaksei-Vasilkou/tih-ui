@@ -63,7 +63,7 @@ export default function QuestionDetailPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> Back to search
         </button>
         <div className="flex items-center gap-2">
           <button

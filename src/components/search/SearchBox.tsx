@@ -11,7 +11,7 @@ export default function SearchBox({ value, onChange, placeholder = 'Search quest
     <div className="relative w-full">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
       <input
-        type="search"
+        type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -19,7 +19,7 @@ export default function SearchBox({ value, onChange, placeholder = 'Search quest
                    placeholder-gray-400 text-base shadow-sm
                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
                    transition-shadow"
-        autoComplete="off"
+        autoComplete="on"
         autoFocus
       />
       {value && (

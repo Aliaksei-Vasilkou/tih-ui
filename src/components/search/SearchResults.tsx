@@ -70,17 +70,19 @@ export default function SearchResults({
           <button
             disabled={page === 0}
             onClick={() => onPageChange(page - 1)}
-            className="p-2 rounded-lg border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg border border-blue-400 text-blue-600 bg-white
+                       hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm font-medium text-blue-600">
             Page {page + 1} of {data.totalPages}
           </span>
           <button
             disabled={data.last}
             onClick={() => onPageChange(page + 1)}
-            className="p-2 rounded-lg border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg border border-blue-400 text-blue-600 bg-white
+                       hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

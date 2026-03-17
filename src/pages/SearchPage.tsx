@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import SearchBox from '@/components/search/SearchBox'
 import SearchResults from '@/components/search/SearchResults'
 import FilterPanel from '@/components/common/FilterPanel'
@@ -9,8 +9,10 @@ import { useUIStore } from '@/store/uiStore'
 import { useSearch } from '@/hooks/useSearch'
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('')
-  const [page, setPage] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = searchParams.get('q') ?? ''
+  const page  = Number(searchParams.get('page') ?? '0')
+
   const { selectedLanguageId, selectedCategoryId } = useFilterStore()
   const { showUpload, showExport } = useUIStore()
 
@@ -22,8 +24,20 @@ export default function SearchPage() {
   )
 
   const handleQueryChange = (val: string) => {
-    setQuery(val)
-    setPage(0)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (val) next.set('q', val); else next.delete('q')
+      next.delete('page')
+      return next
+    }, { replace: true })
+  }
+
+  const handlePageChange = (val: number) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (val > 0) next.set('page', String(val)); else next.delete('page')
+      return next
+    }, { replace: true })
   }
 
   return (
@@ -48,7 +62,7 @@ export default function SearchPage() {
       )}
 
       {/* Filters */}
-      <FilterPanel />
+      <FilterPanel onCategoryChange={() => handlePageChange(0)} />
 
       {/* Results */}
       <SearchResults
@@ -57,7 +71,7 @@ export default function SearchPage() {
         isError={isError}
         query={query}
         page={page}
-        onPageChange={setPage}
+        onPageChange={handlePageChange}
       />
     </div>
   )
