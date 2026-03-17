@@ -4,6 +4,10 @@ import Highlight from '@tiptap/extension-highlight'
 import TextStyle from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import Underline from '@tiptap/extension-underline'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
 import { Markdown } from 'tiptap-markdown'
 import EditorToolbar from './EditorToolbar'
 import clsx from 'clsx'
@@ -30,6 +34,10 @@ export default function RichTextEditor({
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableCell,
+      TableHeader,
       Markdown.configure({
         html: true,                // allow inline HTML (e.g. colour spans) in Markdown
         transformPastedText: true,

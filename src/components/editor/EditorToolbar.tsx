@@ -53,6 +53,8 @@ interface EditorToolbarProps {
 }
 
 export default function EditorToolbar({ editor }: EditorToolbarProps) {
+  const inTable = editor.isActive('table')
+
   return (
     <div className="flex flex-col border-b border-gray-200 bg-gray-50 sticky top-16 z-30 rounded-t-lg shadow-sm">
 
@@ -105,6 +107,19 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Numbered list">
           1. List
         </ToolbarButton>
+
+        <div className="w-px h-5 bg-gray-300 mx-1" />
+
+        <ToolbarButton
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          active={inTable}
+          title="Insert table"
+        >
+          ⊞ Table
+        </ToolbarButton>
+
+        <div className="w-px h-5 bg-gray-300 mx-1" />
+
         <ToolbarButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} title="Code block">
           Code block
         </ToolbarButton>
@@ -172,6 +187,53 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           />
         ))}
       </div>
+
+      {/* ── Row 3: table controls (only when cursor is inside a table) ── */}
+      {inTable && (
+        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-gray-200 bg-blue-50">
+          <span className="text-xs text-blue-500 font-medium mr-1">Table:</span>
+
+          <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Add row above">
+            ↑ Row
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Add row below">
+            ↓ Row
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Delete row">
+            ✕ Row
+          </ToolbarButton>
+
+          <div className="w-px h-5 bg-blue-200 mx-1" />
+
+          <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add column left">
+            ← Col
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add column right">
+            → Col
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete column">
+            ✕ Col
+          </ToolbarButton>
+
+          <div className="w-px h-5 bg-blue-200 mx-1" />
+
+          <ToolbarButton onClick={() => editor.chain().focus().mergeCells().run()} title="Merge selected cells">
+            Merge
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().splitCell().run()} title="Split cell">
+            Split
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()} title="Toggle header row">
+            Header row
+          </ToolbarButton>
+
+          <div className="w-px h-5 bg-blue-200 mx-1" />
+
+          <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Delete table">
+            <span className="text-red-500">✕ Table</span>
+          </ToolbarButton>
+        </div>
+      )}
 
     </div>
   )

@@ -57,6 +57,22 @@
 }
 .tiptap-content hr { @apply border-gray-300 my-4; }
 .tiptap-content mark { @apply rounded px-0.5; }
+.tiptap-content table {
+  @apply w-full border-collapse mb-4 text-sm;
+}
+.tiptap-content th {
+  @apply relative bg-gray-200 text-gray-800 font-semibold text-left px-3 py-2 border border-gray-400;
+}
+.tiptap-content td {
+  @apply relative px-3 py-2 border border-gray-300 align-top min-w-[2rem];
+}
+.tiptap-content tbody tr:nth-child(odd) td  { @apply bg-gray-50; }
+.tiptap-content tbody tr:nth-child(even) td { @apply bg-gray-100; }
+/* Selected cell highlight while editing */
+.tiptap-content .selectedCell:after {
+  content: '';
+  @apply absolute inset-0 bg-primary-100 opacity-50 pointer-events-none z-10;
+}
 
 /* ── Markdown viewer ── */
 .md-content { @apply leading-relaxed text-gray-800; }
@@ -94,12 +110,13 @@
   @apply w-full border-collapse mb-4 text-sm;
 }
 .md-content th {
-  @apply bg-gray-100 text-gray-700 font-semibold text-left px-3 py-2 border border-gray-200;
+  @apply bg-gray-200 text-gray-800 font-semibold text-left px-3 py-2 border border-gray-400;
 }
 .md-content td {
   @apply px-3 py-2 border border-gray-200 align-top;
 }
-.md-content tr:nth-child(even) td { @apply bg-gray-50; }
+.md-content tbody tr:nth-child(odd) td  { @apply bg-gray-50; }
+.md-content tbody tr:nth-child(even) td { @apply bg-gray-100; }
 
 /* Editor area */
 .ProseMirror {
