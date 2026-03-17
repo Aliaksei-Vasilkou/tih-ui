@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Blue rounded background -->
+  <rect width="32" height="32" rx="8" fill="#2563eb"/>
+  <!-- Open book icon (matches lucide BookOpen, scaled to 32x32) -->
+  <g stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left page -->
+    <path d="M16 26V9"/>
+    <path d="M16 9C14 7 10 7 7 8.5V26C10 24.5 14 24.5 16 26Z"/>
+    <!-- Right page -->
+    <path d="M16 9C18 7 22 7 25 8.5V26C22 24.5 18 24.5 16 26Z"/>
+  </g>
+</svg>
