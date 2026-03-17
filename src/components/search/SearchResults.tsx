@@ -58,9 +58,9 @@ export default function SearchResults({
       </p>
 
       {/* Cards */}
-      <div className="space-y-3">
+      <div className="space-y-1.5">
         {data.content.map((question) => (
-          <QuestionCard key={question.id} question={question} />
+          <QuestionCard key={question.id} question={question} query={query} />
         ))}
       </div>
 
