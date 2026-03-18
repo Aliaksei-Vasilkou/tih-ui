@@ -76,7 +76,7 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         : questionsApi.create(data),
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ['questions'] })
-      navigate(`/questions/${saved.id}`)
+      navigate(`/questions/${saved.id}`, { replace: true })
     },
   })
 
