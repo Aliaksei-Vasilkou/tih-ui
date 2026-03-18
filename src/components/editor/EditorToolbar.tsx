@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import type { Editor } from '@tiptap/react'
 import clsx from 'clsx'
 
@@ -50,6 +51,104 @@ const TEXT_COLORS = [
 
 interface EditorToolbarProps {
   editor: Editor
+}
+
+const DIAGRAM_OPTIONS = [
+  {
+    key: 'plantuml',
+    label: 'PlantUML',
+    description: 'UML sequences, components, states…',
+    lang: 'plantuml',
+    template: `@startuml\nAlice -> Bob: Hello\nBob --> Alice: Hi there!\n@enduml`,
+    recommended: true,
+    hint: '@startuml\nA -> B: message\n@enduml',
+    docsUrl: 'https://plantuml.com/',
+  },
+  {
+    key: 'mermaid',
+    label: 'Mermaid',
+    description: 'Flowcharts, sequences, class diagrams…',
+    lang: 'mermaid',
+    template: `graph TD\n    A[Start] --> B{Decision}\n    B -->|Yes| C[Do it]\n    B -->|No| D[Skip]`,
+    recommended: false,
+    hint: 'graph TD\n  A --> B --> C',
+    docsUrl: 'https://mermaid.js.org/intro/',
+  },
+] as const
+
+function DiagramMenu({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const insert = (opt: typeof DIAGRAM_OPTIONS[number]) => {
+    editor.chain().focus().insertContent({
+      type: 'codeBlock',
+      attrs: { language: opt.lang },
+      content: [{ type: 'text', text: opt.template }],
+    }).run()
+    setOpen(false)
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => { e.preventDefault(); setOpen((v) => !v) }}
+        title="Insert diagram"
+        className={clsx(
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center gap-1',
+          open ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+        )}
+      >
+        ⬡ Diagram
+        <span className="text-[10px] opacity-60">▾</span>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-72">
+          {DIAGRAM_OPTIONS.map((opt) => (
+            <div key={opt.key} className="border-b border-gray-100 last:border-0">
+              <button
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); insert(opt) }}
+                className="w-full text-left px-3 py-2 hover:bg-primary-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-800">{opt.label}</span>
+                  {opt.recommended
+                    ? <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Recommended</span>
+                    : <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Beta</span>
+                  }
+                </div>
+                <div className="text-xs text-gray-400 mb-1.5">{opt.description}</div>
+                <pre className="text-[10px] leading-relaxed bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-gray-500 font-mono whitespace-pre">{opt.hint}</pre>
+              </button>
+              <div className="px-3 pb-1.5">
+                <a
+                  href={opt.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="text-[10px] text-primary-500 hover:text-primary-700 hover:underline transition-colors"
+                >
+                  View full syntax docs ↗
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function EditorToolbar({ editor }: EditorToolbarProps) {
@@ -126,6 +225,10 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} title="Blockquote">
           ❝
         </ToolbarButton>
+
+        <div className="w-px h-5 bg-gray-300 mx-1" />
+
+        <DiagramMenu editor={editor} />
       </div>
 
       {/* ── Row 2: colour palettes ── */}
