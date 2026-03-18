@@ -4,6 +4,7 @@ import { categoriesApi } from '@/api/categories'
 import { languagesApi } from '@/api/languages'
 import type { Category, CategoryCreateRequest } from '@/types'
 import { X, Plus, Pencil, Trash2, Loader2, Check } from 'lucide-react'
+import Select from '@/components/common/Select'
 
 interface Props {
   /** Pre-selected language; user can switch inside the modal */
@@ -102,19 +103,16 @@ export default function ManageCategoriesModal({ initialLanguageId, onClose }: Pr
         {/* Language picker */}
         <div className="px-6 pt-4 pb-2">
           <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">Language</label>
-          <select
+          <Select
             value={selectedLanguageId}
-            onChange={(e) => {
-              setSelectedLanguageId(e.target.value ? Number(e.target.value) : '')
+            onChange={(val) => {
+              setSelectedLanguageId(val === '' ? '' : Number(val))
               resetForm()
             }}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="">Select language…</option>
-            {languages.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
-            ))}
-          </select>
+            options={languages.map((l) => ({ value: l.id, label: l.name }))}
+            placeholder="Select language…"
+            className="w-full"
+          />
         </div>
 
         {/* Body */}

@@ -11,7 +11,8 @@ import ManageLanguagesModal from '@/components/common/ManageLanguagesModal'
 import ManageCategoriesModal from '@/components/common/ManageCategoriesModal'
 import ManageTagsModal from '@/components/common/ManageTagsModal'
 import TagPickerModal from '@/components/common/TagPickerModal'
-import { Loader2, Pencil, Plus, Settings2, X } from 'lucide-react'
+import Select from '@/components/common/Select'
+import { Loader2, Pencil, Settings2 } from 'lucide-react'
 
 interface QuestionFormProps {
   initialData?: Question
@@ -173,17 +174,13 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
               <Settings2 className="w-3.5 h-3.5" /> Manage
             </button>
           </div>
-          <select
+          <Select
             value={languageId}
-            onChange={(e) => setLanguageId(e.target.value ? Number(e.target.value) : '')}
-            className="w-full rounded-lg border border-gray-300 px-3 pr-8 py-2 text-gray-900
-                       focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">Select language…</option>
-            {languages.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
-            ))}
-          </select>
+            onChange={(val) => setLanguageId(val === '' ? '' : Number(val))}
+            options={languages.map((l) => ({ value: l.id, label: l.name }))}
+            placeholder="Select language…"
+            className="w-full"
+          />
           {errors.languageId && (
             <p className="text-red-500 text-xs mt-1">{errors.languageId}</p>
           )}
@@ -204,19 +201,14 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
               <Settings2 className="w-3.5 h-3.5" /> Manage
             </button>
           </div>
-          <select
+          <Select
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : '')}
+            onChange={(val) => setCategoryId(val === '' ? '' : Number(val))}
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            placeholder="Select category…"
             disabled={!languageId}
-            className="w-full rounded-lg border border-gray-300 px-3 pr-8 py-2 text-gray-900
-                       focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                       disabled:bg-gray-50 disabled:text-gray-400"
-          >
-            <option value="">Select category…</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+            className="w-full"
+          />
           {errors.categoryId && (
             <p className="text-red-500 text-xs mt-1">{errors.categoryId}</p>
           )}

@@ -1,0 +1,137 @@
+import { useState, useRef, useEffect } from 'react'
+import { ChevronDown, Check } from 'lucide-react'
+import clsx from 'clsx'
+
+export interface SelectOption {
+  value: string | number
+  label: string
+}
+
+interface SelectProps {
+  value: string | number
+  onChange: (value: string | number) => void
+  options: SelectOption[]
+  placeholder?: string
+  disabled?: boolean
+  className?: string
+  /** 'sm' = compact header/toolbar variant, 'md' = default form variant */
+  size?: 'sm' | 'md'
+}
+
+export default function Select({
+  value,
+  onChange,
+  options,
+  placeholder = 'Select…',
+  disabled = false,
+  className,
+  size = 'md',
+}: SelectProps) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const selected = options.find((o) => o.value === value)
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const handleMouseDown = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [open])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open])
+
+  const handleSelect = (optValue: string | number) => {
+    onChange(optValue)
+    setOpen(false)
+  }
+
+  // All options in the dropdown, including the placeholder "empty" option
+  const allOptions: SelectOption[] = [{ value: '', label: placeholder }, ...options]
+
+  return (
+    <div ref={containerRef} className={clsx('relative', className)}>
+      {/* Trigger button */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={clsx(
+          'flex items-center justify-between w-full gap-2 rounded-lg border bg-white text-left',
+          'border-gray-300 hover:border-primary-500',
+          'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+          'transition-colors',
+          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50' : 'cursor-pointer',
+          size === 'sm' ? 'pl-3 pr-2.5 py-1.5 text-sm' : 'pl-3 pr-2.5 py-2 text-sm',
+          selected ? 'text-gray-900' : 'text-gray-400',
+        )}
+      >
+        <span className="truncate min-w-0">
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronDown
+          className={clsx(
+            'w-3.5 h-3.5 text-gray-500 transition-transform shrink-0',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {/* Dropdown list */}
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1 max-h-60 overflow-y-auto"
+        >
+          {allOptions.map((option) => {
+            const isSelected = option.value === value
+            const isEmpty = option.value === ''
+            return (
+              <li
+                key={isEmpty ? '__placeholder__' : option.value}
+                role="option"
+                aria-selected={isSelected}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleSelect(option.value)}
+                  className={clsx(
+                    'flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors',
+                    'hover:bg-primary-50',
+                    isEmpty
+                      ? 'text-gray-400 italic'
+                      : isSelected
+                        ? 'text-primary-700 font-medium'
+                        : 'text-gray-700',
+                  )}
+                >
+                  <span className="w-3.5 h-3.5 shrink-0 flex items-center justify-center">
+                    {isSelected && !isEmpty && (
+                      <Check className="w-3.5 h-3.5 text-primary-600" />
+                    )}
+                  </span>
+                  {option.label}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
