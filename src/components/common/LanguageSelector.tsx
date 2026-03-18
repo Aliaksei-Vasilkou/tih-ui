@@ -32,11 +32,13 @@ export default function LanguageSelector() {
                    cursor-pointer"
       >
         <option value="">All Languages</option>
-        {languages.map((lang) => (
-          <option key={lang.id} value={lang.id}>
-            {lang.name}
-          </option>
-        ))}
+        {languages
+          .filter((lang) => lang.code !== 'general')
+          .map((lang) => (
+            <option key={lang.id} value={lang.id}>
+              {lang.name}
+            </option>
+          ))}
       </select>
       <ChevronDown className="pointer-events-none absolute right-2 w-3.5 h-3.5 text-gray-500" />
     </div>
