@@ -77,17 +77,45 @@ export default function BatchUpload() {
       {/* Format hint */}
       <details className="text-sm text-gray-500">
         <summary className="cursor-pointer hover:text-gray-700">Expected JSON format</summary>
-        <pre className="mt-2 bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto">
+        <div className="mt-2 space-y-3">
+          <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed">
 {`[
   {
-    "externalId": "optional-uuid-for-dedup",
-    "questionText": "What is polymorphism?",
-    "answerContent": "<p>Polymorphism is…</p>",
-    "languageCode": "java",
-    "categoryName": "Core"
+    "extId":    "optional-uuid",        // used for deduplication (optional)
+    "question": "What is polymorphism?",
+    "answer":   "<p>HTML answer…</p>",
+    "language": "java",                 // language code
+    "category": "Core",                 // category name (created if missing)
+    "tags":     ["L1", "OOP"]           // tag names (optional, created if missing)
   }
 ]`}
-        </pre>
+          </pre>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="text-left text-gray-400 uppercase tracking-wide">
+                <th className="pb-1 pr-4 font-semibold">Field</th>
+                <th className="pb-1 pr-4 font-semibold">Required</th>
+                <th className="pb-1 font-semibold">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-600 divide-y divide-gray-100">
+              {[
+                ['extId',    'No',  'Stable external ID for deduplication — re-importing the same ID skips the row'],
+                ['question', 'Yes', 'Plain text of the interview question'],
+                ['answer',   'No',  'HTML answer body (rich text)'],
+                ['language', 'Yes', 'Language code that must already exist (e.g. java, typescript)'],
+                ['category', 'Yes', 'Category name — created automatically if it does not exist for that language'],
+                ['tags',     'No',  'Array of tag names — created automatically if they do not exist for that language'],
+              ].map(([field, req, desc]) => (
+                <tr key={field}>
+                  <td className="py-1.5 pr-4 font-mono text-indigo-700">{field}</td>
+                  <td className="py-1.5 pr-4">{req}</td>
+                  <td className="py-1.5 text-gray-500">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </details>
 
       {/* Result */}

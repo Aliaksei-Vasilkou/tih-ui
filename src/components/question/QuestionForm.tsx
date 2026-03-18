@@ -3,18 +3,22 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { languagesApi } from '@/api/languages'
 import { categoriesApi } from '@/api/categories'
+import { tagsApi } from '@/api/tags'
 import { questionsApi } from '@/api/questions'
-import type { Question, QuestionCreateRequest, Language, Category } from '@/types'
+import type { Question, QuestionCreateRequest, Language, Category, Tag } from '@/types'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import ManageLanguagesModal from '@/components/common/ManageLanguagesModal'
 import ManageCategoriesModal from '@/components/common/ManageCategoriesModal'
-import { Loader2, Settings2 } from 'lucide-react'
+import ManageTagsModal from '@/components/common/ManageTagsModal'
+import TagPickerModal from '@/components/common/TagPickerModal'
+import { Loader2, Pencil, Plus, Settings2, X } from 'lucide-react'
 
 interface QuestionFormProps {
   initialData?: Question
+  title?: string
 }
 
-export default function QuestionForm({ initialData }: QuestionFormProps) {
+export default function QuestionForm({ initialData, title }: QuestionFormProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isEditing = Boolean(initialData)
@@ -26,6 +30,9 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showManageLangs, setShowManageLangs] = useState(false)
   const [showManageCats, setShowManageCats] = useState(false)
+  const [showManageTags, setShowManageTags] = useState(false)
+  const [showTagPicker, setShowTagPicker] = useState(false)
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
 
   const { data: languages = [] as Language[] } = useQuery({
     queryKey: ['languages'],
@@ -38,9 +45,28 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
     enabled: Boolean(languageId),
   })
 
-  // Reset category when language changes
+  const { data: availableTags = [] as Tag[] } = useQuery({
+    queryKey: ['tags', languageId],
+    queryFn: () => tagsApi.getAll(languageId as number),
+    enabled: Boolean(languageId),
+  })
+
+  // On edit, pre-select tags by matching names to available tag IDs
   useEffect(() => {
-    if (!isEditing) setCategoryId('')
+    if (isEditing && initialData?.tags && availableTags.length > 0) {
+      const ids = availableTags
+        .filter((t) => initialData.tags.includes(t.name))
+        .map((t) => t.id)
+      setSelectedTagIds(ids)
+    }
+  }, [isEditing, availableTags, initialData?.tags])
+
+  // Reset category & tags when language changes
+  useEffect(() => {
+    if (!isEditing) {
+      setCategoryId('')
+      setSelectedTagIds([])
+    }
   }, [languageId, isEditing])
 
   const mutation = useMutation<Question, Error, QuestionCreateRequest>({
@@ -71,11 +97,47 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
       answerContent,
       languageId: Number(languageId),
       categoryId: Number(categoryId),
+      tagIds: selectedTagIds,
     })
   }
 
+  const handleTagPickerClose = (ids: number[]) => {
+    setSelectedTagIds(ids)
+    setShowTagPicker(false)
+    queryClient.invalidateQueries({ queryKey: ['tags', languageId] })
+  }
+
+  // Selected tag objects for display
+  const selectedTags = availableTags.filter((t) => selectedTagIds.includes(t.id))
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Title + Tags header */}
+      {title && (
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h1 className="text-xl font-semibold text-gray-900 shrink-0">{title}</h1>
+          {languageId && (
+            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+              <span className="text-[11px] text-gray-400 font-medium">Tags:</span>
+              {selectedTags.map((tag) => (
+                <span key={tag.id} className="tag">{tag.name}</span>
+              ))}
+              {/* Add / open picker button — after the tags */}
+              <button
+                type="button"
+                onClick={() => setShowTagPicker(true)}
+                className="inline-flex items-center justify-center w-5 h-5 rounded border border-dashed
+                           border-indigo-300 text-indigo-400 hover:border-indigo-500 hover:text-indigo-600
+                           hover:bg-indigo-50 transition-colors"
+                title="Manage tags"
+              >
+                <Pencil className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Question text */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -161,6 +223,7 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
         </div>
       </div>
 
+
       {/* Answer editor */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Answer</label>
@@ -203,6 +266,22 @@ export default function QuestionForm({ initialData }: QuestionFormProps) {
         <ManageCategoriesModal
           initialLanguageId={languageId || undefined}
           onClose={() => setShowManageCats(false)}
+        />
+      )}
+      {showManageTags && (
+        <ManageTagsModal
+          initialLanguageId={languageId || undefined}
+          onClose={() => {
+            setShowManageTags(false)
+            queryClient.invalidateQueries({ queryKey: ['tags', languageId] })
+          }}
+        />
+      )}
+      {showTagPicker && languageId && (
+        <TagPickerModal
+          languageId={languageId as number}
+          selectedTagIds={selectedTagIds}
+          onClose={handleTagPickerClose}
         />
       )}
     </form>

@@ -15,8 +15,7 @@ export default function CreateQuestionPage() {
       </button>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <h1 className="text-xl font-semibold text-gray-900 mb-6">New Question</h1>
-        <QuestionForm />
+        <QuestionForm title="New Question" />
       </div>
     </div>
   )

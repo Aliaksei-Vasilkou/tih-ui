@@ -19,7 +19,7 @@ export default function SearchBox({ value, onChange, placeholder = 'Search quest
                    placeholder-gray-400 text-base shadow-sm
                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
                    transition-shadow"
-        autoComplete="on"
+        autoComplete="off"
         autoFocus
       />
       {value && (

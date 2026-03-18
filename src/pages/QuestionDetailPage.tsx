@@ -55,6 +55,17 @@ export default function QuestionDetailPage() {
 
   const langColor = LANGUAGE_COLORS[question.languageCode] ?? 'bg-gray-100 text-gray-700'
 
+  const LEVEL_TAG_RE = /^L[1-4]$/i
+  const sortedTags = question.tags
+    ? [...question.tags].sort((a, b) => {
+        const aIsLevel = LEVEL_TAG_RE.test(a)
+        const bIsLevel = LEVEL_TAG_RE.test(b)
+        if (aIsLevel && !bIsLevel) return -1
+        if (!aIsLevel && bIsLevel) return 1
+        return a.localeCompare(b)
+      })
+    : []
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Back + actions */}
@@ -91,13 +102,25 @@ export default function QuestionDetailPage() {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className={clsx('text-xs font-semibold px-2.5 py-1 rounded-full', langColor)}>
-              {question.languageName}
-            </span>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
-              {question.categoryName}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className={clsx('text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap', langColor)}>
+                {question.languageName}
+              </span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">
+                {question.categoryName}
+              </span>
+            </div>
+            {sortedTags.length > 0 && (
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                <span className="text-[10px] text-gray-400 font-small">Tags:</span>
+                {sortedTags.map((tag) => (
+                  <span key={tag} className="tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <h1 className="text-xl font-semibold text-gray-900 leading-snug">
             {question.questionText}
@@ -114,7 +137,7 @@ export default function QuestionDetailPage() {
         </div>
 
         {/* Meta */}
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-400 flex gap-4">
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-400 flex items-center gap-4">
           <span>Created by {question.createdBy}</span>
           <span>·</span>
           <span>{new Date(question.createdAt).toLocaleDateString()}</span>

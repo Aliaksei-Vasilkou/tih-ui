@@ -41,8 +41,7 @@ export default function EditQuestionPage() {
       </button>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <h1 className="text-xl font-semibold text-gray-900 mb-6">Edit Question</h1>
-        <QuestionForm initialData={question} />
+        <QuestionForm initialData={question} title="Edit Question" />
       </div>
     </div>
   )

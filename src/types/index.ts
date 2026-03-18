@@ -22,6 +22,14 @@ export interface Category {
   createdBy: string
 }
 
+export interface Tag {
+  id: number
+  name: string
+  languageId: number
+  languageName: string
+  languageCode: string
+}
+
 export interface Question {
   id: number
   questionText: string
@@ -31,6 +39,7 @@ export interface Question {
   languageCode: string
   categoryId: number
   categoryName: string
+  tags: string[]
   createdAt: string
   updatedAt: string
   createdBy: string
@@ -54,6 +63,7 @@ export interface QuestionCreateRequest {
   answerContent: string
   languageId: number
   categoryId: number
+  tagIds?: number[]
 }
 
 export interface LanguageCreateRequest {
@@ -66,6 +76,10 @@ export interface CategoryCreateRequest {
   languageId: number
 }
 
+export interface TagCreateRequest {
+  name: string
+}
+
 export interface BatchUploadResponse {
   totalItems: number
   successCount: number
@@ -75,12 +89,14 @@ export interface BatchUploadResponse {
   skipped: string[]
 }
 
-export interface QuestionExportItem {
-  externalId: string
-  questionText: string
-  answerContent: string
-  languageCode: string
-  categoryName: string
+/** Unified import/export format — mirrors QuestionTransferItem on the backend */
+export interface QuestionTransferItem {
+  extId?: string
+  question: string
+  answer: string
+  language: string
+  category: string
+  tags: string[]
 }
 
 // ──────────────────────────────────────────────
