@@ -1,4 +1,5 @@
 import { AlertTriangle, Loader2 } from 'lucide-react'
+import ModalShell from './ModalShell'
 
 interface UnsavedChangesDialogProps {
   isSaving: boolean
@@ -14,29 +15,24 @@ export default function UnsavedChangesDialog({
   onSave,
 }: UnsavedChangesDialogProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
-        {/* Icon + heading */}
+    <ModalShell title="Unsaved Changes" onClose={onKeepEditing} maxWidth="md">
+      <div className="px-6 py-5 space-y-5">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-amber-100">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
+          <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-warning-bg">
+            <AlertTriangle className="w-5 h-5 text-warning" />
           </div>
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Unsaved Changes</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              You have unsaved changes. Do you want to save them before leaving?
-            </p>
-          </div>
+          <p className="text-sm text-foreground-secondary mt-2">
+            You have unsaved changes. Do you want to save them before leaving?
+          </p>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           <button
             type="button"
             onClick={onKeepEditing}
             disabled={isSaving}
-            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300
-                       rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-foreground-secondary border border-border-strong
+                       rounded-lg hover:bg-surface-alt transition-colors disabled:opacity-50"
           >
             Keep Editing
           </button>
@@ -44,8 +40,8 @@ export default function UnsavedChangesDialog({
             type="button"
             onClick={onDiscard}
             disabled={isSaving}
-            className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200
-                       rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-error border border-error-light
+                       rounded-lg hover:bg-error-bg transition-colors disabled:opacity-50"
           >
             Discard Changes
           </button>
@@ -62,6 +58,6 @@ export default function UnsavedChangesDialog({
           </button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   )
 }

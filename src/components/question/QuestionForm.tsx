@@ -9,7 +9,6 @@ import type { Question, QuestionCreateRequest, Language, Category, Tag } from '@
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import ManageLanguagesModal from '@/components/common/ManageLanguagesModal'
 import ManageCategoriesModal from '@/components/common/ManageCategoriesModal'
-import ManageTagsModal from '@/components/common/ManageTagsModal'
 import TagPickerModal from '@/components/common/TagPickerModal'
 import Select from '@/components/common/Select'
 import UnsavedChangesDialog from '@/components/common/UnsavedChangesDialog'
@@ -32,14 +31,13 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showManageLangs, setShowManageLangs] = useState(false)
   const [showManageCats, setShowManageCats] = useState(false)
-  const [showManageTags, setShowManageTags] = useState(false)
   const [showTagPicker, setShowTagPicker] = useState(false)
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
 
-  // Refs for unsaved-change tracking
-  const isDirtyRef = useRef(false)           // read inside the stable blocker fn (no stale closure)
-  const [isDirty, setIsDirty] = useState(false) // drives the badge UI
-  const hasInitializedTagsRef = useRef(false) // prevent tag-useEffect from resetting after invalidation
+  const isDirtyRef = useRef(false)
+  const [isDirty, setIsDirty] = useState(false)
+  const hasInitializedTagsRef = useRef(false)
+  // isSavingRef prevents the blocker from triggering during a successful save navigation
   const isSavingRef = useRef(false)
 
   const markDirty = useCallback(() => {
@@ -64,19 +62,15 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
     enabled: Boolean(languageId),
   })
 
-  // On edit, pre-select tags from initialData — only once, so a later refetch doesn't override user changes
   useEffect(() => {
     if (isEditing && availableTags.length > 0 && !hasInitializedTagsRef.current) {
       const initialTags = initialData?.tags ?? []
-      const ids = availableTags
-        .filter((t) => initialTags.includes(t.name))
-        .map((t) => t.id)
+      const ids = availableTags.filter((t) => initialTags.includes(t.name)).map((t) => t.id)
       setSelectedTagIds(ids)
       hasInitializedTagsRef.current = true
     }
   }, [isEditing, availableTags, initialData?.tags])
 
-  // Reset category & tags when language changes
   useEffect(() => {
     if (!isEditing) {
       setCategoryId('')
@@ -86,21 +80,16 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
 
   const mutation = useMutation<Question, Error, QuestionCreateRequest>({
     mutationFn: (data: QuestionCreateRequest) =>
-      isEditing
-        ? questionsApi.update(initialData!.id, data)
-        : questionsApi.create(data),
+      isEditing ? questionsApi.update(initialData!.id, data) : questionsApi.create(data),
     onSuccess: (saved) => {
       isDirtyRef.current = false
       isSavingRef.current = false
       queryClient.invalidateQueries({ queryKey: ['questions'] })
       navigate(`/questions/${saved.id}`, { replace: true })
     },
-    onError: () => {
-      isSavingRef.current = false
-    },
+    onError: () => { isSavingRef.current = false },
   })
 
-  // Stable function — reads from refs at call-time, no stale-closure risk
   const blockerFn = useCallback(() => isDirtyRef.current && !isSavingRef.current, [])
   const blocker = useBlocker(blockerFn)
 
@@ -126,13 +115,9 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
     })
   }
 
-  // Called by UnsavedChangesDialog "Save Changes"
   const handleSaveAndProceed = () => {
-    if (!validate()) {
-      blocker.reset?.()
-      return
-    }
-    isDirtyRef.current = false   // clear before reset so the post-save navigation isn't blocked
+    if (!validate()) { blocker.reset?.(); return }
+    isDirtyRef.current = false
     setIsDirty(false)
     isSavingRef.current = true
     blocker.reset?.()
@@ -145,11 +130,6 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
     })
   }
 
-  // Called by UnsavedChangesDialog "Discard Changes"
-  const handleDiscard = () => {
-    blocker.proceed?.()
-  }
-
   const handleTagPickerClose = (ids: number[]) => {
     setSelectedTagIds(ids)
     setShowTagPicker(false)
@@ -157,36 +137,33 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
     queryClient.invalidateQueries({ queryKey: ['tags', languageId] })
   }
 
-  // Selected tag objects for display
   const selectedTags = availableTags.filter((t) => selectedTagIds.includes(t.id))
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Title + Tags header */}
       {title && (
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2 shrink-0">
-            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{title}</h1>
             {isDirty && (
-              <span className="flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span className="flex items-center gap-1 text-xs font-medium text-unsaved-text bg-unsaved-bg border border-unsaved-border rounded-full px-2 py-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-unsaved-text" />
                 Unsaved
               </span>
             )}
           </div>
           {languageId && (
             <div className="flex items-center gap-1.5 flex-wrap justify-end">
-              <span className="text-[11px] text-gray-400 font-medium">Tags:</span>
+              <span className="text-[11px] text-muted-light font-medium">Tags:</span>
               {selectedTags.map((tag) => (
                 <span key={tag.id} className="tag">{tag.name}</span>
               ))}
-              {/* Add / open picker button — after the tags */}
               <button
                 type="button"
                 onClick={() => setShowTagPicker(true)}
                 className="inline-flex items-center justify-center w-5 h-5 rounded border border-dashed
-                           border-indigo-300 text-indigo-400 hover:border-indigo-500 hover:text-indigo-600
-                           hover:bg-indigo-50 transition-colors"
+                           border-primary-400 text-primary-400 hover:border-primary-600 hover:text-primary-600
+                           hover:bg-primary-50 transition-colors"
                 title="Manage tags"
               >
                 <Pencil className="w-3 h-3" />
@@ -196,36 +173,32 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         </div>
       )}
 
-      {/* Question text */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Question <span className="text-red-500">*</span>
+        <label className="block text-sm font-medium text-foreground-secondary mb-1">
+          Question <span className="text-error">*</span>
         </label>
         <input
           type="text"
           value={questionText}
           onChange={(e) => { setQuestionText(e.target.value); markDirty() }}
           placeholder="Enter the interview question…"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900
-                     placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500
-                     focus:border-primary-500 transition-shadow"
+          className="w-full rounded-lg border border-border-strong px-3 py-2 text-foreground bg-surface
+                     placeholder-placeholder focus:outline-none focus:ring-2 focus:ring-primary-500
+                     focus:border-border-focus transition-shadow"
         />
-        {errors.questionText && (
-          <p className="text-red-500 text-xs mt-1">{errors.questionText}</p>
-        )}
+        {errors.questionText && <p className="text-error text-xs mt-1">{errors.questionText}</p>}
       </div>
 
-      {/* Language & Category */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
-              Language <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-foreground-secondary">
+              Language <span className="text-error">*</span>
             </label>
             <button
               type="button"
               onClick={() => setShowManageLangs(true)}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary-600 transition-colors"
+              className="flex items-center gap-1 text-xs text-muted hover:text-primary-600 transition-colors"
               title="Manage languages"
             >
               <Settings2 className="w-3.5 h-3.5" /> Manage
@@ -238,21 +211,19 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
             placeholder="Select language…"
             className="w-full"
           />
-          {errors.languageId && (
-            <p className="text-red-500 text-xs mt-1">{errors.languageId}</p>
-          )}
+          {errors.languageId && <p className="text-error text-xs mt-1">{errors.languageId}</p>}
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
-              Category <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-foreground-secondary">
+              Category <span className="text-error">*</span>
             </label>
             <button
               type="button"
               onClick={() => setShowManageCats(true)}
               disabled={!languageId}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 text-xs text-muted hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               title="Manage categories"
             >
               <Settings2 className="w-3.5 h-3.5" /> Manage
@@ -266,16 +237,12 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
             disabled={!languageId}
             className="w-full"
           />
-          {errors.categoryId && (
-            <p className="text-red-500 text-xs mt-1">{errors.categoryId}</p>
-          )}
+          {errors.categoryId && <p className="text-error text-xs mt-1">{errors.categoryId}</p>}
         </div>
       </div>
 
-
-      {/* Answer editor */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Answer</label>
+        <label className="block text-sm font-medium text-foreground-secondary mb-1">Answer</label>
         <RichTextEditor
           content={answerContent}
           onChange={(val) => { setAnswerContent(val); markDirty() }}
@@ -283,9 +250,8 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         />
       </div>
 
-      {/* Submit */}
       {mutation.isError && (
-        <p className="text-red-500 text-sm">{(mutation.error as Error).message}</p>
+        <p className="text-error text-sm">{(mutation.error as Error).message}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -301,29 +267,18 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium
-                     rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-6 py-2.5 border border-border-strong text-foreground-secondary font-medium
+                     rounded-lg hover:bg-surface-alt transition-colors"
         >
           Cancel
         </button>
       </div>
 
-      {showManageLangs && (
-        <ManageLanguagesModal onClose={() => setShowManageLangs(false)} />
-      )}
+      {showManageLangs && <ManageLanguagesModal onClose={() => setShowManageLangs(false)} />}
       {showManageCats && (
         <ManageCategoriesModal
           initialLanguageId={languageId || undefined}
           onClose={() => setShowManageCats(false)}
-        />
-      )}
-      {showManageTags && (
-        <ManageTagsModal
-          initialLanguageId={languageId || undefined}
-          onClose={() => {
-            setShowManageTags(false)
-            queryClient.invalidateQueries({ queryKey: ['tags', languageId] })
-          }}
         />
       )}
       {showTagPicker && languageId && (
@@ -338,7 +293,7 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         <UnsavedChangesDialog
           isSaving={mutation.isPending}
           onKeepEditing={() => blocker.reset?.()}
-          onDiscard={handleDiscard}
+          onDiscard={() => blocker.proceed?.()}
           onSave={handleSaveAndProceed}
         />
       )}

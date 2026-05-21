@@ -55,15 +55,13 @@ export default function BatchExport() {
     exportMutation.mutate()
   }
 
+  const selectedLanguageName = languages.find((l) => l.code === selectedLanguageCode)?.name
+
   return (
     <div className="space-y-4">
-      {/* Controls row */}
       <div className="flex flex-wrap items-end gap-3">
-        {/* Language */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Language
-          </label>
+          <label className="text-xs font-medium text-muted uppercase tracking-wide">Language</label>
           <Select
             value={selectedLanguageId ?? ''}
             onChange={handleLanguageChange}
@@ -74,12 +72,9 @@ export default function BatchExport() {
           />
         </div>
 
-        {/* Category — only shown when a language is selected */}
         {selectedLanguageId && (
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              Category
-            </label>
+            <label className="text-xs font-medium text-muted uppercase tracking-wide">Category</label>
             <Select
               value={selectedCategoryName}
               onChange={handleCategoryChange}
@@ -91,7 +86,6 @@ export default function BatchExport() {
           </div>
         )}
 
-        {/* Export button */}
         <button
           onClick={handleExport}
           disabled={exportMutation.isPending}
@@ -111,24 +105,22 @@ export default function BatchExport() {
         </button>
       </div>
 
-      {/* Scope summary */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted">
         {selectedLanguageCode
           ? selectedCategoryName
-            ? <>Exporting <span className="font-medium text-gray-700">{selectedCategoryName}</span> questions for <span className="font-medium text-gray-700">{languages.find(l => l.code === selectedLanguageCode)?.name}</span>.</>
-            : <>Exporting all <span className="font-medium text-gray-700">{languages.find(l => l.code === selectedLanguageCode)?.name}</span> questions.</>
+            ? <>Exporting <span className="font-medium text-foreground-secondary">{selectedCategoryName}</span> questions for <span className="font-medium text-foreground-secondary">{selectedLanguageName}</span>.</>
+            : <>Exporting all <span className="font-medium text-foreground-secondary">{selectedLanguageName}</span> questions.</>
           : 'Exporting all questions across every language and category.'}
       </p>
 
-      {/* Feedback */}
       {status === 'success' && (
-        <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2.5">
+        <div className="flex items-center gap-2 text-sm text-success bg-success-bg border border-success-light rounded-lg px-4 py-2.5">
           <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           <span>Export downloaded successfully. The file can be re-imported on any device.</span>
         </div>
       )}
       {status === 'error' && (
-        <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+        <div className="flex items-center gap-2 text-sm text-error bg-error-bg border border-error-light rounded-lg px-4 py-2.5">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>Export failed. Please try again.</span>
         </div>

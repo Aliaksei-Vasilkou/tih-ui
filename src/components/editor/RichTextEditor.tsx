@@ -39,7 +39,7 @@ export default function RichTextEditor({
       TableCell,
       TableHeader,
       Markdown.configure({
-        html: true,                // allow inline HTML (e.g. colour spans) in Markdown
+        html: true,
         transformPastedText: true,
         transformCopiedText: true,
       }),
@@ -60,8 +60,8 @@ export default function RichTextEditor({
   return (
     <div
       className={clsx(
-        'rounded-lg border border-gray-300 bg-white',
-        !readOnly && 'focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-primary-500',
+        'rounded-lg border border-border-strong bg-surface overflow-hidden',
+        !readOnly && 'focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-border-focus',
         className,
       )}
     >

@@ -32,7 +32,6 @@ export default function Select({
 
   const selected = options.find((o) => o.value === value)
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return
     const handleMouseDown = (e: MouseEvent) => {
@@ -44,7 +43,6 @@ export default function Select({
     return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [open])
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,12 +57,10 @@ export default function Select({
     setOpen(false)
   }
 
-  // All options in the dropdown, including the placeholder "empty" option
   const allOptions: SelectOption[] = [{ value: '', label: placeholder }, ...options]
 
   return (
     <div ref={containerRef} className={clsx('relative', className)}>
-      {/* Trigger button */}
       <button
         type="button"
         disabled={disabled}
@@ -72,13 +68,13 @@ export default function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         className={clsx(
-          'flex items-center justify-between w-full gap-2 rounded-lg border bg-white text-left',
-          'border-gray-300 hover:border-primary-500',
+          'flex items-center justify-between w-full gap-2 rounded-lg border bg-surface text-left',
+          'border-border-strong hover:border-primary-500',
           'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
           'transition-colors',
-          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50' : 'cursor-pointer',
+          disabled ? 'opacity-60 cursor-not-allowed bg-surface-alt' : 'cursor-pointer',
           size === 'sm' ? 'pl-3 pr-2.5 py-1.5 text-sm' : 'pl-3 pr-2.5 py-2 text-sm',
-          selected ? 'text-gray-900' : 'text-gray-400',
+          selected ? 'text-foreground' : 'text-placeholder',
         )}
       >
         <span className="truncate min-w-0">
@@ -86,17 +82,16 @@ export default function Select({
         </span>
         <ChevronDown
           className={clsx(
-            'w-3.5 h-3.5 text-gray-500 transition-transform shrink-0',
+            'w-3.5 h-3.5 text-muted transition-transform shrink-0',
             open && 'rotate-180',
           )}
         />
       </button>
 
-      {/* Dropdown list */}
       {open && (
         <ul
           role="listbox"
-          className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1 max-h-60 overflow-y-auto"
+          className="absolute z-50 mt-1 w-full bg-surface border border-border rounded-lg shadow-theme-md py-1 max-h-60 overflow-y-auto"
         >
           {allOptions.map((option) => {
             const isSelected = option.value === value
@@ -114,10 +109,10 @@ export default function Select({
                     'flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors',
                     'hover:bg-primary-50',
                     isEmpty
-                      ? 'text-gray-400 italic'
+                      ? 'text-placeholder italic'
                       : isSelected
                         ? 'text-primary-700 font-medium'
-                        : 'text-gray-700',
+                        : 'text-foreground-secondary',
                   )}
                 >
                   <span className="w-3.5 h-3.5 shrink-0 flex items-center justify-center">

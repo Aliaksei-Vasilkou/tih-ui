@@ -4,39 +4,100 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default theme CSS variables (Light theme) — prevents flash of unstyled content */
+:root {
+  --color-background: #f9fafb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f9fafb;
+  --color-foreground: #111827;
+  --color-foreground-secondary: #374151;
+  --color-muted: #6b7280;
+  --color-muted-light: #9ca3af;
+  --color-placeholder: #9ca3af;
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-900: #1e3a8a;
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+  --color-border-focus: #3b82f6;
+  --color-error: #ef4444;
+  --color-error-light: #fecaca;
+  --color-error-bg: #fef2f2;
+  --color-success: #16a34a;
+  --color-success-light: #bbf7d0;
+  --color-success-bg: #f0fdf4;
+  --color-warning: #ca8a04;
+  --color-warning-bg: #fefce8;
+  --color-warning-border: #fde68a;
+  --color-badge-lang-java-bg: #ffedd5;
+  --color-badge-lang-java-text: #c2410c;
+  --color-badge-lang-ts-bg: #dbeafe;
+  --color-badge-lang-ts-text: #1d4ed8;
+  --color-badge-default-bg: #f3f4f6;
+  --color-badge-default-text: #374151;
+  --color-badge-category-bg: #f3f4f6;
+  --color-badge-category-text: #4b5563;
+  --color-code-inline-bg: #f3f4f6;
+  --color-code-inline-text: #dc2626;
+  --color-code-block-bg: #111827;
+  --color-code-block-text: #f3f4f6;
+  --color-blockquote-border: #60a5fa;
+  --color-blockquote-text: #4b5563;
+  --color-divider: #d1d5db;
+  --color-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --color-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --color-table-header-bg: #e5e7eb;
+  --color-table-header-text: #374151;
+  --color-table-border: #d1d5db;
+  --color-table-row-odd: #f9fafb;
+  --color-table-row-even: #f3f4f6;
+  --color-toolbar-active-bg: #1f2937;
+  --color-toolbar-active-text: #ffffff;
+  --color-diagram-menu-bg: #ffffff;
+  --color-unsaved-bg: #fffbeb;
+  --color-unsaved-border: #fde68a;
+  --color-unsaved-text: #92400e;
+  /* Highlight palette — overridden per theme */
+  --color-highlight-yellow: #fef08a;
+  --color-highlight-green:  #bbf7d0;
+  --color-highlight-red:    #fecaca;
+  --color-highlight-blue:   #bfdbfe;
+  --color-highlight-purple: #e9d5ff;
+  /* Text drawn inside any <mark> — must contrast against the highlight bg */
+  --color-highlight-text: #111827;
+}
 
 @layer base {
   html {
-    @apply text-gray-900 bg-gray-50;
+    @apply text-foreground bg-background;
   }
   * {
     @apply box-border;
   }
 }
 
-/* TipTap editor prose styles */
+/* ── TipTap editor prose styles ── */
 .tiptap-content {
   @apply leading-relaxed;
 }
 
-/* H1 – large title with blue bottom border */
 .tiptap-content h1 {
-  @apply text-2xl font-extrabold text-gray-900 mt-6 mb-3 pb-2
-         border-b-2 border-primary-500;
+  @apply text-2xl font-extrabold text-foreground mt-6 mb-3 pb-2 border-b-2 border-primary-500;
 }
-/* H2 – section header in primary colour */
 .tiptap-content h2 {
   @apply text-xl font-bold text-primary-700 mt-5 mb-2;
 }
-/* H3 – sub-section in a muted slate */
 .tiptap-content h3 {
-  @apply text-base font-semibold text-gray-500 uppercase tracking-wide mt-4 mb-2;
+  @apply text-base font-semibold text-muted uppercase tracking-wide mt-4 mb-2;
 }
 .tiptap-content p  { @apply mb-3; }
 .tiptap-content ul { @apply list-disc mb-3 space-y-1 pl-5; }
 .tiptap-content ol { @apply list-decimal mb-3 space-y-1 pl-5; }
 .tiptap-content li { @apply leading-relaxed; }
-/* Tiptap wraps list-item content in <p> – prevent it from creating a new line */
 .tiptap-content li > p { @apply m-0 inline; }
 .tiptap-content li > ul,
 .tiptap-content li > ol { @apply mt-1 mb-0; }
@@ -45,53 +106,53 @@
 .tiptap-content u  { @apply underline; }
 .tiptap-content s  { @apply line-through; }
 .tiptap-content code {
-  @apply bg-gray-100 text-red-600 text-sm px-1.5 py-0.5 rounded font-mono;
+  @apply bg-code-inline-bg text-code-inline-text text-sm px-1.5 py-0.5 rounded font-mono;
 }
 .tiptap-content pre {
-  @apply bg-[#fafafa] text-gray-800 rounded-lg p-4 overflow-x-auto mb-4
-         border border-gray-200 text-sm;
+  @apply bg-code-block-bg text-code-block-text rounded-lg p-4 overflow-x-auto mb-4 text-sm;
 }
 .tiptap-content pre code {
-  @apply bg-transparent text-gray-800 p-0 text-sm font-mono;
+  @apply bg-transparent text-code-block-text p-0 text-sm font-mono;
 }
 .tiptap-content blockquote {
-  @apply border-l-4 border-primary-500 pl-4 italic text-gray-600 mb-3
+  @apply border-l-4 border-blockquote-border pl-4 italic text-blockquote-text mb-3
          bg-primary-50 py-2 rounded-r-lg;
 }
-.tiptap-content hr { @apply border-gray-300 my-4; }
-.tiptap-content mark { @apply rounded px-0.5; }
+.tiptap-content hr { @apply border-divider my-4; }
+.tiptap-content mark {
+  @apply rounded px-0.5;
+  /* !important beats TipTap's inline "color: inherit" */
+  color: var(--color-highlight-text) !important;
+}
+
+/* TipTap tables */
 .tiptap-content table {
   @apply w-full border-collapse mb-4 text-sm;
 }
 .tiptap-content th {
-  @apply relative bg-gray-200 text-gray-800 font-semibold text-left px-3 py-2 border border-gray-400;
+  @apply relative bg-table-header-bg text-table-header-text font-semibold text-left px-3 py-2 border border-table-border;
 }
 .tiptap-content td {
-  @apply relative px-3 py-2 border border-gray-300 align-top min-w-[2rem];
+  @apply relative px-3 py-2 border border-table-border align-top min-w-[2rem];
 }
-.tiptap-content tbody tr:nth-child(odd) td  { @apply bg-gray-50; }
-.tiptap-content tbody tr:nth-child(even) td { @apply bg-gray-100; }
-/* Selected cell highlight while editing */
+.tiptap-content tbody tr:nth-child(odd) td  { background-color: var(--color-table-row-odd); }
+.tiptap-content tbody tr:nth-child(even) td { background-color: var(--color-table-row-even); }
 .tiptap-content .selectedCell:after {
   content: '';
   @apply absolute inset-0 bg-primary-100 opacity-50 pointer-events-none z-10;
 }
 
 /* ── Markdown viewer ── */
-.md-content { @apply leading-relaxed text-gray-800; }
+.md-content { @apply leading-relaxed text-foreground; }
 
-/* H1 – large title with blue bottom border */
 .md-content h1 {
-  @apply text-2xl font-extrabold text-gray-900 mt-6 mb-3 pb-2
-         border-b-2 border-primary-500;
+  @apply text-2xl font-extrabold text-foreground mt-6 mb-3 pb-2 border-b-2 border-primary-500;
 }
-/* H2 – section header in primary colour */
 .md-content h2 {
   @apply text-xl font-bold text-primary-700 mt-5 mb-2;
 }
-/* H3 – sub-section in a muted slate */
 .md-content h3 {
-  @apply text-base font-semibold text-gray-500 uppercase tracking-wide mt-4 mb-2;
+  @apply text-base font-semibold text-muted uppercase tracking-wide mt-4 mb-2;
 }
 .md-content p  { @apply mb-3 leading-relaxed; }
 .md-content ul { @apply list-disc mb-3 space-y-1 pl-5; }
@@ -99,34 +160,44 @@
 .md-content li { @apply leading-relaxed; }
 .md-content li > ul,
 .md-content li > ol { @apply mt-1 mb-0; }
-.md-content strong { @apply font-semibold text-gray-900; }
+.md-content strong { @apply font-semibold text-foreground; }
 .md-content em { @apply italic; }
 .md-content s  { @apply line-through; }
 .md-content blockquote {
-  @apply border-l-4 border-primary-500 pl-4 italic text-gray-600 mb-3 bg-primary-50 py-2 rounded-r-lg;
+  @apply border-l-4 border-blockquote-border pl-4 italic text-blockquote-text mb-3
+         bg-primary-50 py-2 rounded-r-lg;
 }
-.md-content hr { @apply border-gray-200 my-5; }
-.md-inline-code {
-  @apply bg-gray-100 text-red-600 text-sm px-1.5 py-0.5 rounded font-mono;
+.md-content hr { @apply border-divider my-5; }
+.md-content mark {
+  /* !important beats TipTap's inline "color: inherit" */
+  color: var(--color-highlight-text) !important;
 }
+
+/* Markdown viewer tables */
 .md-content table {
   @apply w-full border-collapse mb-4 text-sm;
 }
 .md-content th {
-  @apply bg-gray-200 text-gray-800 font-semibold text-left px-3 py-2 border border-gray-400;
+  @apply bg-table-header-bg text-table-header-text font-semibold text-left px-3 py-2 border border-table-border;
 }
 .md-content td {
-  @apply px-3 py-2 border border-gray-200 align-top;
+  @apply px-3 py-2 border border-table-border align-top;
 }
-.md-content tbody tr:nth-child(odd) td  { @apply bg-gray-50; }
-.md-content tbody tr:nth-child(even) td { @apply bg-gray-100; }
+.md-content tbody tr:nth-child(odd) td  { background-color: var(--color-table-row-odd); }
+.md-content tbody tr:nth-child(even) td { background-color: var(--color-table-row-even); }
 
 /* Editor area */
 .ProseMirror {
-  @apply outline-none min-h-[200px] p-4;
+  @apply outline-none min-h-[200px] p-4 overflow-x-auto;
 }
 .ProseMirror.ProseMirror-focused { @apply outline-none; }
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  @apply text-gray-400 pointer-events-none float-left h-0;
+  @apply text-placeholder pointer-events-none float-left h-0;
 }
+
+mark[data-color="#fef08a"] { background-color: var(--color-highlight-yellow)  !important; }
+mark[data-color="#bbf7d0"] { background-color: var(--color-highlight-green)   !important; }
+mark[data-color="#fecaca"] { background-color: var(--color-highlight-red)     !important; }
+mark[data-color="#bfdbfe"] { background-color: var(--color-highlight-blue)    !important; }
+mark[data-color="#e9d5ff"] { background-color: var(--color-highlight-purple)  !important; }
