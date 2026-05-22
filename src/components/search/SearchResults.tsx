@@ -1,6 +1,7 @@
 import type { PageResponse, Question } from '@/types'
 import QuestionCard from '@/components/question/QuestionCard'
-import { ChevronLeft, ChevronRight, Loader2, SearchX } from 'lucide-react'
+import { ChevronLeft, ChevronRight, SearchX } from 'lucide-react'
+import PageLoader from '@/components/common/PageLoader'
 
 interface SearchResultsProps {
   data?: PageResponse<Question>
@@ -19,18 +20,11 @@ export default function SearchResults({
   page,
   onPageChange,
 }: SearchResultsProps) {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-20 text-gray-400">
-        <Loader2 className="w-8 h-8 animate-spin mr-3" />
-        <span className="text-lg">Searching…</span>
-      </div>
-    )
-  }
+  if (isLoading) return <PageLoader message="Searching…" />
 
   if (isError) {
     return (
-      <div className="text-center py-20 text-red-500">
+      <div className="text-center py-20 text-error">
         <p className="text-lg font-medium">Failed to load results.</p>
         <p className="text-sm mt-1">Please try again.</p>
       </div>
@@ -39,7 +33,7 @@ export default function SearchResults({
 
   if (!data || data.content.length === 0) {
     return (
-      <div className="flex flex-col items-center py-20 text-gray-400 gap-3">
+      <div className="flex flex-col items-center py-20 text-muted-light gap-3">
         <SearchX className="w-12 h-12" />
         <p className="text-lg font-medium">
           {query ? `No results for "${query}"` : 'No questions found'}
@@ -51,38 +45,33 @@ export default function SearchResults({
 
   return (
     <div className="space-y-4">
-      {/* Result count */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted">
         {data.totalElements} question{data.totalElements !== 1 ? 's' : ''} found
-        {query && <> for <span className="font-medium text-gray-700">"{query}"</span></>}
+        {query && <> for <span className="font-medium text-foreground-secondary">"{query}"</span></>}
       </p>
 
-      {/* Cards */}
       <div className="space-y-1.5">
         {data.content.map((question) => (
           <QuestionCard key={question.id} question={question} query={query} />
         ))}
       </div>
 
-      {/* Pagination */}
       {data.totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 pt-4">
           <button
             disabled={page === 0}
             onClick={() => onPageChange(page - 1)}
-            className="p-2 rounded-lg border border-blue-400 text-blue-600 bg-white
-                       hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-lg border border-border-strong disabled:opacity-40 hover:bg-surface-alt disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm font-medium text-blue-600">
+          <span className="text-sm font-medium text-muted">
             Page {page + 1} of {data.totalPages}
           </span>
           <button
             disabled={data.last}
             onClick={() => onPageChange(page + 1)}
-            className="p-2 rounded-lg border border-blue-400 text-blue-600 bg-white
-                       hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-lg border border-border-strong disabled:opacity-40 hover:bg-surface-alt disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

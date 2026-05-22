@@ -1,0 +1,20 @@
+{
+  "defaultThemeId": "default-light",
+  "themes": [
+    {
+      "id": "default-light",
+      "name": "Light",
+      "file": "default-light.json"
+    },
+    {
+      "id": "default-dark",
+      "name": "Dark",
+      "file": "default-dark.json"
+    },
+    {
+      "id": "monokai",
+      "name": "Monokai",
+      "file": "monokai.json"
+    }
+  ]
+}

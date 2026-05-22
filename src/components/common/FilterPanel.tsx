@@ -25,14 +25,13 @@ export default function FilterPanel({ onCategoryChange }: FilterPanelProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* All button — always first, active when nothing is selected */}
       <button
         onClick={() => handleSelect(null)}
         className={clsx(
           'px-3 py-1.5 rounded-full text-sm border transition-colors',
           selectedCategoryId === null
-            ? 'bg-gray-800 text-white border-gray-800'
-            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400',
+            ? 'bg-toolbar-active-bg text-toolbar-active-text border-toolbar-active-bg'
+            : 'bg-surface text-muted border-border hover:border-border-strong',
         )}
       >
         All
@@ -45,8 +44,8 @@ export default function FilterPanel({ onCategoryChange }: FilterPanelProps) {
           className={clsx(
             'px-3 py-1.5 rounded-full text-sm border transition-colors',
             selectedCategoryId === cat.id
-              ? 'bg-gray-800 text-white border-gray-800'
-              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400',
+              ? 'bg-toolbar-active-bg text-toolbar-active-text border-toolbar-active-bg'
+              : 'bg-surface text-muted border-border hover:border-border-strong',
           )}
         >
           {cat.name}

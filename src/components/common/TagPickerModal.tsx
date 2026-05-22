@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { tagsApi } from '@/api/tags'
 import type { Tag, TagCreateRequest } from '@/types'
-import { X, Plus, Pencil, Loader2, Check } from 'lucide-react'
+import { Plus, Pencil, Loader2, Check, X } from 'lucide-react'
+import ModalShell from './ModalShell'
 
 interface Props {
   languageId: number
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export default function TagPickerModal({ languageId, selectedTagIds, onClose }: Props) {
-  const qc = useQueryClient()
+  const queryClient = useQueryClient()
 
   const [localSelectedIds, setLocalSelectedIds] = useState<number[]>(selectedTagIds)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -25,7 +26,7 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
     enabled: Boolean(languageId),
   })
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['tags'] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tags'] })
 
   const createMutation = useMutation({
     mutationFn: (data: TagCreateRequest) => tagsApi.create(languageId, data),
@@ -74,116 +75,98 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
     )
   }
 
+  const footer = (
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={() => onClose(localSelectedIds)}
+        className="px-4 py-2 text-sm font-medium text-foreground-secondary border border-border-strong
+                   rounded-lg hover:bg-surface-alt transition-colors"
+      >
+        Done
+      </button>
+    </div>
+  )
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[80vh]">
+    <ModalShell title="Tags" onClose={() => onClose(localSelectedIds)} maxWidth="md" footer={footer}>
+      <div className="px-6 py-5">
+        {isLoading ? (
+          <div className="flex justify-center py-8 text-muted-light">
+            <Loader2 className="w-6 h-6 animate-spin" />
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 items-center">
+            {!showAdd && editingId === null && (
+              <button
+                type="button"
+                onClick={() => setShowAdd(true)}
+                className="inline-flex items-center justify-center w-7 h-7 rounded border-2 border-dashed
+                           border-primary-400 text-primary-400 hover:border-primary-600 hover:text-primary-600
+                           hover:bg-primary-50 transition-colors"
+                title="New tag"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Tags</h2>
-          <button
-            onClick={() => onClose(localSelectedIds)}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+            {showAdd && (
+              <InlineChipForm
+                value={formName}
+                onChange={setFormName}
+                onSave={handleSave}
+                onCancel={resetForm}
+                isPending={createMutation.isPending}
+                error={formError}
+              />
+            )}
 
-        {/* Chip area */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          {isLoading ? (
-            <div className="flex justify-center py-8 text-gray-400">
-              <Loader2 className="w-6 h-6 animate-spin" />
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2 items-center">
-
-              {/* + button — always first */}
-              {!showAdd && editingId === null && (
-                <button
-                  type="button"
-                  onClick={() => setShowAdd(true)}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded border-2 border-dashed
-                             border-indigo-300 text-indigo-400 hover:border-indigo-500 hover:text-indigo-600
-                             hover:bg-indigo-50 transition-colors"
-                  title="New tag"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              )}
-
-              {/* Inline create form */}
-              {showAdd && (
+            {tags.map((tag) =>
+              editingId === tag.id ? (
                 <InlineChipForm
+                  key={tag.id}
                   value={formName}
                   onChange={setFormName}
                   onSave={handleSave}
                   onCancel={resetForm}
-                  isPending={createMutation.isPending}
+                  isPending={updateMutation.isPending}
                   error={formError}
                 />
-              )}
+              ) : (
+                <div key={tag.id} className="relative group/chip">
+                  <button
+                    type="button"
+                    onClick={() => toggleTag(tag.id)}
+                    className={localSelectedIds.includes(tag.id) ? 'tag-selected' : 'tag-interactive'}
+                  >
+                    {tag.name}
+                  </button>
+                  {/* Edit pencil fades in on hover after a short delay */}
+                  <button
+                    type="button"
+                    onClick={() => startEdit(tag)}
+                    title="Edit tag"
+                    className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center
+                               rounded-full bg-surface border border-border shadow-theme-sm
+                               text-muted-light hover:text-primary-600 hover:border-primary-400
+                               opacity-0 group-hover/chip:opacity-100
+                               transition-opacity duration-150 delay-200"
+                  >
+                    <Pencil className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              )
+            )}
 
-              {/* Tag chips */}
-              {tags.map((tag) =>
-                editingId === tag.id ? (
-                  <InlineChipForm
-                    key={tag.id}
-                    value={formName}
-                    onChange={setFormName}
-                    onSave={handleSave}
-                    onCancel={resetForm}
-                    isPending={updateMutation.isPending}
-                    error={formError}
-                  />
-                ) : (
-                  <div key={tag.id} className="relative group/chip">
-                    {/* Tag toggle chip */}
-                    <button
-                      type="button"
-                      onClick={() => toggleTag(tag.id)}
-                      className={localSelectedIds.includes(tag.id) ? 'tag-selected' : 'tag-interactive'}
-                    >
-                      {tag.name}
-                    </button>
-
-                    {/* Edit button — fades in on hover with a short delay */}
-                    <button
-                      type="button"
-                      onClick={() => startEdit(tag)}
-                      title="Edit tag"
-                      className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center
-                                 rounded-full bg-white border border-gray-200 shadow-sm
-                                 text-gray-400 hover:text-primary-600 hover:border-primary-400
-                                 opacity-0 group-hover/chip:opacity-100
-                                 transition-opacity duration-150 delay-200"
-                    >
-                      <Pencil className="w-2.5 h-2.5" />
-                    </button>
-                  </div>
-                )
-              )}
-
-              {tags.length === 0 && !showAdd && (
-                <p className="text-sm text-gray-400">No tags yet — click <strong>+</strong> to add the first one.</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end px-6 py-4 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={() => onClose(localSelectedIds)}
-            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300
-                       rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Done
-          </button>
-        </div>
+            {tags.length === 0 && !showAdd && (
+              <p className="text-sm text-muted-light">
+                No tags yet — click <strong>+</strong> to add the first one.
+              </p>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </ModalShell>
   )
 }
 
@@ -210,29 +193,29 @@ function InlineChipForm({ value, onChange, onSave, onCancel, isPending, error }:
             if (e.key === 'Escape') onCancel()
           }}
           placeholder="Tag name…"
-          className="w-28 rounded border border-indigo-300 px-2 py-0.5 text-xs text-gray-900
-                     placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500
-                     focus:border-indigo-500 disabled:opacity-60"
+          className="w-28 rounded border border-primary-400 px-2 py-0.5 text-xs text-foreground
+                     bg-surface placeholder-placeholder focus:outline-none focus:ring-1 focus:ring-primary-500
+                     focus:border-primary-500 disabled:opacity-60"
         />
         <button
           type="button"
           onClick={onSave}
           disabled={isPending || !value.trim()}
-          className="inline-flex items-center justify-center w-6 h-6 rounded bg-indigo-600
-                     text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center justify-center w-6 h-6 rounded bg-primary-600
+                     text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center justify-center w-6 h-6 rounded border border-gray-300
-                     text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
+          className="inline-flex items-center justify-center w-6 h-6 rounded border border-border-strong
+                     text-muted hover:text-foreground-secondary hover:border-border transition-colors"
         >
           <X className="w-3 h-3" />
         </button>
       </div>
-      {error && <p className="text-red-500 text-[10px]">{error}</p>}
+      {error && <p className="text-error text-[10px]">{error}</p>}
     </div>
   )
 }

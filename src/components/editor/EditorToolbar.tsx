@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Editor } from '@tiptap/react'
 import clsx from 'clsx'
+import { HIGHLIGHT_COLORS, TEXT_COLORS } from '@/constants/editorPalette'
 
 interface ToolbarButtonProps {
   onClick: () => void
@@ -13,41 +14,19 @@ function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps)
   return (
     <button
       type="button"
-      onMouseDown={(e) => {
-        e.preventDefault()
-        onClick()
-      }}
+      onMouseDown={(e) => { e.preventDefault(); onClick() }}
       title={title}
       className={clsx(
         'px-2 py-1 rounded text-sm font-medium transition-colors',
         active
           ? 'bg-primary-100 text-primary-700'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+          : 'text-muted hover:bg-surface-alt hover:text-foreground',
       )}
     >
       {children}
     </button>
   )
 }
-
-const HIGHLIGHT_COLORS = [
-  { label: 'Yellow', value: '#fef08a' },
-  { label: 'Green',  value: '#bbf7d0' },
-  { label: 'Red',    value: '#fecaca' },
-  { label: 'Blue',   value: '#bfdbfe' },
-  { label: 'Purple', value: '#e9d5ff' },
-]
-
-const TEXT_COLORS = [
-  { label: 'Default', value: null },
-  { label: 'Red',     value: '#ef4444' },
-  { label: 'Orange',  value: '#f97316' },
-  { label: 'Green',   value: '#16a34a' },
-  { label: 'Blue',    value: '#2563eb' },
-  { label: 'Purple',  value: '#7c3aed' },
-  { label: 'Pink',    value: '#db2777' },
-  { label: 'Gray',    value: '#6b7280' },
-]
 
 interface EditorToolbarProps {
   editor: Editor
@@ -106,7 +85,7 @@ function DiagramMenu({ editor }: { editor: Editor }) {
         title="Insert diagram"
         className={clsx(
           'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center gap-1',
-          open ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+          open ? 'bg-primary-100 text-primary-700' : 'text-muted hover:bg-surface-alt hover:text-foreground',
         )}
       >
         ⬡ Diagram
@@ -114,23 +93,23 @@ function DiagramMenu({ editor }: { editor: Editor }) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-72">
+        <div className="absolute left-0 top-full mt-1 z-50 bg-diagram-menu-bg border border-border rounded-lg shadow-theme-md py-1 w-72">
           {DIAGRAM_OPTIONS.map((opt) => (
-            <div key={opt.key} className="border-b border-gray-100 last:border-0">
+            <div key={opt.key} className="border-b border-border last:border-0">
               <button
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); insert(opt) }}
                 className="w-full text-left px-3 py-2 hover:bg-primary-50 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-800">{opt.label}</span>
+                  <span className="text-sm font-medium text-foreground">{opt.label}</span>
                   {opt.recommended
-                    ? <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Recommended</span>
-                    : <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Beta</span>
+                    ? <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-success-bg text-success">Recommended</span>
+                    : <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-warning-bg text-warning">Beta</span>
                   }
                 </div>
-                <div className="text-xs text-gray-400 mb-1.5">{opt.description}</div>
-                <pre className="text-[10px] leading-relaxed bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-gray-500 font-mono whitespace-pre">{opt.hint}</pre>
+                <div className="text-xs text-muted mb-1.5">{opt.description}</div>
+                <pre className="text-[10px] leading-relaxed bg-surface-alt border border-border rounded px-2 py-1.5 text-muted font-mono whitespace-pre">{opt.hint}</pre>
               </button>
               <div className="px-3 pb-1.5">
                 <a
@@ -155,18 +134,15 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
   const inTable = editor.isActive('table')
 
   return (
-    <div className="flex flex-col border-b border-gray-200 bg-gray-50 sticky top-16 z-30 rounded-t-lg shadow-sm">
+    <div className="flex flex-col border-b border-border bg-surface-alt rounded-t-lg">
 
       {/* ── Row 1: history + formatting controls ── */}
       <div className="flex flex-wrap items-center gap-0.5 px-3 py-2">
-
-        {/* History — moved to front */}
         <ToolbarButton onClick={() => editor.chain().focus().undo().run()} title="Undo (Ctrl+Z)">↩</ToolbarButton>
         <ToolbarButton onClick={() => editor.chain().focus().redo().run()} title="Redo (Ctrl+Y)">↪</ToolbarButton>
 
-        <div className="w-px h-5 bg-gray-300 mx-1" />
+        <div className="w-px h-5 bg-border-strong mx-1" />
 
-        {/* Text style */}
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Bold (Ctrl+B)">
           <strong>B</strong>
         </ToolbarButton>
@@ -183,9 +159,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           {'</>'}
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-gray-300 mx-1" />
+        <div className="w-px h-5 bg-border-strong mx-1" />
 
-        {/* Headings */}
         {([1, 2, 3] as const).map((level) => (
           <ToolbarButton
             key={level}
@@ -197,9 +172,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           </ToolbarButton>
         ))}
 
-        <div className="w-px h-5 bg-gray-300 mx-1" />
+        <div className="w-px h-5 bg-border-strong mx-1" />
 
-        {/* Lists & blocks */}
         <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="Bullet list">
           • List
         </ToolbarButton>
@@ -207,7 +181,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           1. List
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-gray-300 mx-1" />
+        <div className="w-px h-5 bg-border-strong mx-1" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
@@ -217,7 +191,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           ⊞ Table
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-gray-300 mx-1" />
+        <div className="w-px h-5 bg-border-strong mx-1" />
 
         <ToolbarButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} title="Code block">
           Code block
@@ -226,16 +200,14 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           ❝
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-gray-300 mx-1" />
+        <div className="w-px h-5 bg-border-strong mx-1" />
 
         <DiagramMenu editor={editor} />
       </div>
 
       {/* ── Row 2: colour palettes ── */}
-      <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-gray-200">
-
-        {/* Text colour */}
-        <span className="text-xs text-gray-500 mr-1">Color:</span>
+      <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-border">
+        <span className="text-xs text-muted mr-1">Color:</span>
         {TEXT_COLORS.map((c) =>
           c.value === null ? (
             <button
@@ -243,8 +215,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
               type="button"
               title="Remove colour"
               onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetColor().run() }}
-              className="w-5 h-5 rounded border-2 border-gray-300 bg-white flex items-center
-                         justify-center text-gray-400 text-xs hover:border-gray-500 transition-colors"
+              className="w-5 h-5 rounded border-2 border-border-strong bg-surface flex items-center
+                         justify-center text-muted text-xs hover:border-foreground transition-colors"
             >
               ✕
             </button>
@@ -256,23 +228,22 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
               onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setColor(c.value!).run() }}
               className={clsx(
                 'w-5 h-5 rounded border-2 transition-transform hover:scale-110',
-                editor.isActive('textStyle', { color: c.value }) ? 'border-gray-700 scale-110' : 'border-gray-300',
+                editor.isActive('textStyle', { color: c.value }) ? 'border-foreground scale-110' : 'border-border-strong',
               )}
               style={{ backgroundColor: c.value }}
             />
           ),
         )}
 
-        <div className="w-px h-5 bg-gray-300 mx-2" />
+        <div className="w-px h-5 bg-border-strong mx-2" />
 
-        {/* Highlight colour */}
-        <span className="text-xs text-gray-500 mr-1">Highlight:</span>
+        <span className="text-xs text-muted mr-1">Highlight:</span>
         <button
           type="button"
           title="Remove highlight"
           onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetHighlight().run() }}
-          className="w-5 h-5 rounded border-2 border-gray-300 bg-white flex items-center
-                     justify-center text-gray-400 text-xs hover:border-gray-500 transition-colors"
+          className="w-5 h-5 rounded border-2 border-border-strong bg-surface flex items-center
+                     justify-center text-muted text-xs hover:border-foreground transition-colors"
         >
           ✕
         </button>
@@ -284,60 +255,41 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
             onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHighlight({ color: color.value }).run() }}
             className={clsx(
               'w-5 h-5 rounded border-2 transition-transform hover:scale-110',
-              editor.isActive('highlight', { color: color.value }) ? 'border-gray-700 scale-110' : 'border-gray-300',
+              editor.isActive('highlight', { color: color.value }) ? 'border-foreground scale-110' : 'border-border-strong',
             )}
             style={{ backgroundColor: color.value }}
           />
         ))}
       </div>
 
-      {/* ── Row 3: table controls (only when cursor is inside a table) ── */}
+      {/* ── Row 3: table controls ── */}
       {inTable && (
-        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-gray-200 bg-blue-50">
-          <span className="text-xs text-blue-500 font-medium mr-1">Table:</span>
+        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-border bg-primary-50">
+          <span className="text-xs text-primary-500 font-medium mr-1">Table:</span>
 
-          <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Add row above">
-            ↑ Row
-          </ToolbarButton>
-          <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Add row below">
-            ↓ Row
-          </ToolbarButton>
-          <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Delete row">
-            ✕ Row
-          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Add row above">↑ Row</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Add row below">↓ Row</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Delete row">✕ Row</ToolbarButton>
 
-          <div className="w-px h-5 bg-blue-200 mx-1" />
+          <div className="w-px h-5 bg-primary-400 mx-1" />
 
-          <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add column left">
-            ← Col
-          </ToolbarButton>
-          <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add column right">
-            → Col
-          </ToolbarButton>
-          <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete column">
-            ✕ Col
-          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add column left">← Col</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add column right">→ Col</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete column">✕ Col</ToolbarButton>
 
-          <div className="w-px h-5 bg-blue-200 mx-1" />
+          <div className="w-px h-5 bg-primary-400 mx-1" />
 
-          <ToolbarButton onClick={() => editor.chain().focus().mergeCells().run()} title="Merge selected cells">
-            Merge
-          </ToolbarButton>
-          <ToolbarButton onClick={() => editor.chain().focus().splitCell().run()} title="Split cell">
-            Split
-          </ToolbarButton>
-          <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()} title="Toggle header row">
-            Header row
-          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().mergeCells().run()} title="Merge selected cells">Merge</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().splitCell().run()} title="Split cell">Split</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()} title="Toggle header row">Header row</ToolbarButton>
 
-          <div className="w-px h-5 bg-blue-200 mx-1" />
+          <div className="w-px h-5 bg-primary-400 mx-1" />
 
           <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Delete table">
-            <span className="text-red-500">✕ Table</span>
+            <span className="text-error">✕ Table</span>
           </ToolbarButton>
         </div>
       )}
-
     </div>
   )
 }
