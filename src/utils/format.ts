@@ -3,5 +3,5 @@ export function formatDate(iso: string): string {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  })
+  });
 }

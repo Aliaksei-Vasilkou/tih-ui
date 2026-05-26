@@ -1,5 +1,5 @@
-import QuestionForm from '@/components/question/QuestionForm'
-import BackButton from '@/components/common/BackButton'
+import QuestionForm from '@/components/question/QuestionForm';
+import BackButton from '@/components/common/BackButton';
 
 export default function CreateQuestionPage() {
   return (
@@ -9,5 +9,5 @@ export default function CreateQuestionPage() {
         <QuestionForm title="New Question" />
       </div>
     </div>
-  )
+  );
 }

@@ -1,54 +1,58 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { questionsApi } from '@/api/questions'
-import MarkdownViewer from '@/components/common/MarkdownViewer'
-import BackButton from '@/components/common/BackButton'
-import PageLoader from '@/components/common/PageLoader'
-import PageError from '@/components/common/PageError'
-import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog'
-import { Pencil, Trash2, Loader2 } from 'lucide-react'
-import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '@/constants/languageColors'
-import { formatDate } from '@/utils/format'
-import clsx from 'clsx'
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { questionsApi } from '@/api/questions';
+import MarkdownViewer from '@/components/common/MarkdownViewer';
+import BackButton from '@/components/common/BackButton';
+import PageLoader from '@/components/common/PageLoader';
+import PageError from '@/components/common/PageError';
+import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
+import { Pencil, Trash2, Loader2 } from 'lucide-react';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '@/constants/languageColors';
+import { formatDate } from '@/utils/format';
+import clsx from 'clsx';
 
-const LEVEL_TAG_RE = /^L[1-4]$/i
+const LEVEL_TAG_RE = /^L[1-4]$/i;
 
 function sortTags(tags: string[]): string[] {
   return [...tags].sort((a, b) => {
-    const aIsLevel = LEVEL_TAG_RE.test(a)
-    const bIsLevel = LEVEL_TAG_RE.test(b)
-    if (aIsLevel && !bIsLevel) return -1
-    if (!aIsLevel && bIsLevel) return 1
-    return a.localeCompare(b)
-  })
+    const aIsLevel = LEVEL_TAG_RE.test(a);
+    const bIsLevel = LEVEL_TAG_RE.test(b);
+    if (aIsLevel && !bIsLevel) return -1;
+    if (!aIsLevel && bIsLevel) return 1;
+    return a.localeCompare(b);
+  });
 }
 
 export default function QuestionDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const { data: question, isLoading, isError } = useQuery({
+  const {
+    data: question,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['questions', Number(id)],
     queryFn: () => questionsApi.getById(Number(id)),
     enabled: Boolean(id),
-  })
+  });
 
   const deleteMutation = useMutation({
     mutationFn: () => questionsApi.delete(Number(id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] })
-      navigate('/search')
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      navigate('/search');
     },
-  })
+  });
 
-  if (isLoading) return <PageLoader />
-  if (isError || !question) return <PageError message="Question not found." />
+  if (isLoading) return <PageLoader />;
+  if (isError || !question) return <PageError message="Question not found." />;
 
-  const langColor = LANGUAGE_COLORS[question.languageCode] ?? DEFAULT_LANGUAGE_COLOR
-  const sortedTags = question.tags ? sortTags(question.tags) : []
+  const langColor = LANGUAGE_COLORS[question.languageCode] ?? DEFAULT_LANGUAGE_COLOR;
+  const sortedTags = question.tags ? sortTags(question.tags) : [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -68,9 +72,7 @@ export default function QuestionDetailPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-error-light
                        rounded-lg text-error hover:bg-error-bg transition-colors disabled:opacity-50"
           >
-            {deleteMutation.isPending
-              ? <Loader2 className="w-4 h-4 animate-spin" />
-              : <Trash2 className="w-4 h-4" />}
+            {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
             Delete
           </button>
         </div>
@@ -91,14 +93,14 @@ export default function QuestionDetailPage() {
               <div className="flex flex-wrap items-center justify-end gap-1.5">
                 <span className="text-[10px] text-muted-light font-small">Tags:</span>
                 {sortedTags.map((tag) => (
-                  <span key={tag} className="tag">{tag}</span>
+                  <span key={tag} className="tag">
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
           </div>
-          <h1 className="text-xl font-semibold text-foreground leading-snug">
-            {question.questionText}
-          </h1>
+          <h1 className="text-xl font-semibold text-foreground leading-snug">{question.questionText}</h1>
         </div>
 
         <div className="px-6 py-5">
@@ -125,5 +127,5 @@ export default function QuestionDetailPage() {
         />
       )}
     </div>
-  )
+  );
 }

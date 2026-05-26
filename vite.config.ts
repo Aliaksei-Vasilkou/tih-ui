@@ -1,8 +1,19 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/main.tsx', 'src/**/*.d.ts', 'src/test/**'],
+    },
+  },
   plugins: [react()],
   resolve: {
     alias: {
@@ -36,7 +47,7 @@ export default defineConfig({
          */
         manualChunks: {
           'react-core': ['react', 'react-dom', 'react-router-dom'],
-          'editor': [
+          editor: [
             '@tiptap/react',
             '@tiptap/starter-kit',
             '@tiptap/extension-color',
@@ -49,13 +60,13 @@ export default defineConfig({
             '@tiptap/extension-table-header',
             'tiptap-markdown',
           ],
-          'mermaid': ['mermaid'],
+          mermaid: ['mermaid'],
           'syntax-highlighter': ['react-syntax-highlighter'],
-          'markdown': ['react-markdown', 'remark-gfm', 'rehype-raw'],
-          'query': ['@tanstack/react-query', '@tanstack/react-query-devtools'],
-          'utils': ['axios', 'clsx', 'zustand', 'lucide-react', 'react-dropzone'],
+          markdown: ['react-markdown', 'remark-gfm', 'rehype-raw'],
+          query: ['@tanstack/react-query', '@tanstack/react-query-devtools'],
+          utils: ['axios', 'clsx', 'zustand', 'lucide-react', 'react-dropzone'],
         },
       },
     },
   },
-})
+});

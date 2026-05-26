@@ -1,7 +1,7 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react';
 
 interface PageLoaderProps {
-  message?: string
+  message?: string;
 }
 
 export default function PageLoader({ message = 'Loading…' }: PageLoaderProps) {
@@ -10,5 +10,5 @@ export default function PageLoader({ message = 'Loading…' }: PageLoaderProps) 
       <Loader2 className="w-8 h-8 animate-spin mr-3" />
       <span className="text-lg">{message}</span>
     </div>
-  )
+  );
 }

@@ -1,44 +1,47 @@
-import { useSearchParams } from 'react-router-dom'
-import SearchBox from '@/components/search/SearchBox'
-import SearchResults from '@/components/search/SearchResults'
-import FilterPanel from '@/components/common/FilterPanel'
-import BatchUpload from '@/components/common/BatchUpload'
-import BatchExport from '@/components/common/BatchExport'
-import { useFilterStore } from '@/store/filterStore'
-import { useUIStore } from '@/store/uiStore'
-import { useSearch } from '@/hooks/useSearch'
+import { useSearchParams } from 'react-router-dom';
+import SearchBox from '@/components/search/SearchBox';
+import SearchResults from '@/components/search/SearchResults';
+import FilterPanel from '@/components/common/FilterPanel';
+import BatchUpload from '@/components/common/BatchUpload';
+import BatchExport from '@/components/common/BatchExport';
+import { useFilterStore } from '@/store/filterStore';
+import { useUIStore } from '@/store/uiStore';
+import { useSearch } from '@/hooks/useSearch';
 
 export default function SearchPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const query = searchParams.get('q') ?? ''
-  const page  = Number(searchParams.get('page') ?? '0')
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get('q') ?? '';
+  const page = Number(searchParams.get('page') ?? '0');
 
-  const { selectedLanguageId, selectedCategoryId } = useFilterStore()
-  const { showUpload, showExport } = useUIStore()
+  const { selectedLanguageId, selectedCategoryId } = useFilterStore();
+  const { showUpload, showExport } = useUIStore();
 
-  const { data, isLoading, isError } = useSearch(
-    query,
-    selectedLanguageId,
-    selectedCategoryId,
-    page,
-  )
+  const { data, isLoading, isError } = useSearch(query, selectedLanguageId, selectedCategoryId, page);
 
   const handleQueryChange = (val: string) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      if (val) next.set('q', val); else next.delete('q')
-      next.delete('page')
-      return next
-    }, { replace: true })
-  }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (val) next.set('q', val);
+        else next.delete('q');
+        next.delete('page');
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   const handlePageChange = (val: number) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      if (val > 0) next.set('page', String(val)); else next.delete('page')
-      return next
-    }, { replace: true })
-  }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (val > 0) next.set('page', String(val));
+        else next.delete('page');
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   return (
     <div className="space-y-5">
@@ -69,5 +72,5 @@ export default function SearchPage() {
         onPageChange={handlePageChange}
       />
     </div>
-  )
+  );
 }

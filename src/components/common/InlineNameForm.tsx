@@ -1,13 +1,13 @@
-import { X, Check, Loader2 } from 'lucide-react'
+import { X, Check, Loader2 } from 'lucide-react';
 
 interface InlineNameFormProps {
-  value: string
-  onChange: (v: string) => void
-  onSave: () => void
-  onCancel: () => void
-  isPending: boolean
-  error: string
-  placeholder?: string
+  value: string;
+  onChange: (v: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  isPending: boolean;
+  error: string;
+  placeholder?: string;
 }
 
 export default function InlineNameForm({
@@ -52,5 +52,5 @@ export default function InlineNameForm({
       </div>
       {error && <p className="text-error text-xs">{error}</p>}
     </div>
-  )
+  );
 }

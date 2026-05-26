@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
-import mermaid from 'mermaid'
+import { useEffect, useRef, useState } from 'react';
+import mermaid from 'mermaid';
 
 mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
   securityLevel: 'loose',
   fontFamily: 'inherit',
-})
+});
 
 interface MermaidDiagramProps {
-  code: string
+  code: string;
 }
 
 /**
@@ -27,73 +27,72 @@ interface MermaidDiagramProps {
  *   <  0.15 → very small        (50%)
  */
 function computeDiagramWidth(svg: SVGElement, containerWidth: number): string {
-  const viewBox = svg.getAttribute('viewBox')
-  const parts = viewBox?.trim().split(/\s+/).map(Number)
-  const naturalWidth = parts && parts.length >= 3 ? parts[2] : parseFloat(svg.getAttribute('width') ?? '0')
+  const viewBox = svg.getAttribute('viewBox');
+  const parts = viewBox?.trim().split(/\s+/).map(Number);
+  const naturalWidth = parts && parts.length >= 3 ? parts[2] : parseFloat(svg.getAttribute('width') ?? '0');
 
-  if (!naturalWidth || !containerWidth) return '80%'
+  if (!naturalWidth || !containerWidth) return '80%';
 
-  const ratio = naturalWidth / containerWidth
+  const ratio = naturalWidth / containerWidth;
 
-  if (ratio >= 0.85) return '100%'
-  if (ratio >= 0.55) return '90%'
-  if (ratio >= 0.35) return '75%'
-  if (ratio >= 0.15) return '60%'
-  return '50%'
+  if (ratio >= 0.85) return '100%';
+  if (ratio >= 0.55) return '90%';
+  if (ratio >= 0.35) return '75%';
+  if (ratio >= 0.15) return '60%';
+  return '50%';
 }
 
 export default function MermaidDiagram({ code }: MermaidDiagramProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!containerRef.current) return
-    let cancelled = false
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    let cancelled = false;
 
-    setError('')
-    setLoading(true)
-    containerRef.current.innerHTML = ''
-
-    ;(async () => {
+    setError('');
+    setLoading(true);
+    container.innerHTML = '';
+    (async () => {
       try {
-        await mermaid.parse(code)
+        await mermaid.parse(code);
 
-        if (cancelled || !containerRef.current) return
+        if (cancelled || !container) return;
 
-        const pre = document.createElement('pre')
-        pre.className = 'mermaid'
-        pre.textContent = code
-        containerRef.current.appendChild(pre)
+        const pre = document.createElement('pre');
+        pre.className = 'mermaid';
+        pre.textContent = code;
+        container.appendChild(pre);
 
-        await mermaid.run({ nodes: [pre], suppressErrors: false })
+        await mermaid.run({ nodes: [pre], suppressErrors: false });
 
-        if (cancelled || !containerRef.current) return
+        if (cancelled || !container) return;
 
-        const svg = containerRef.current.querySelector('svg')
+        const svg = container.querySelector('svg');
         if (svg) {
-          const containerWidth = containerRef.current.offsetWidth
-          const width = computeDiagramWidth(svg, containerWidth)
-          svg.style.width = width
-          svg.style.height = 'auto'
-          svg.style.display = 'block'
-          svg.style.margin = '0 auto'
+          const containerWidth = container.offsetWidth;
+          svg.style.width = computeDiagramWidth(svg, containerWidth);
+          svg.style.height = 'auto';
+          svg.style.display = 'block';
+          svg.style.margin = '0 auto';
         }
 
-        setLoading(false)
+        setLoading(false);
       } catch (e: unknown) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : String(e))
-          setLoading(false)
+          setError(e instanceof Error ? e.message : String(e));
+          setLoading(false);
         }
       }
-    })()
+    })();
 
     return () => {
-      cancelled = true
-      if (containerRef.current) containerRef.current.innerHTML = ''
-    }
-  }, [code])
+      cancelled = true;
+      container.innerHTML = '';
+    };
+  }, [code]);
 
   if (error) {
     return (
@@ -101,17 +100,13 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
         <span className="font-semibold">Mermaid error: </span>
         <span className="font-mono">{error}</span>
       </div>
-    )
+    );
   }
 
   return (
     <div className="relative my-4 rounded-lg border border-gray-200 bg-white overflow-x-auto">
-      {loading && (
-        <div className="flex items-center justify-center py-8 text-sm text-gray-400">
-          Rendering diagram…
-        </div>
-      )}
+      {loading && <div className="flex items-center justify-center py-8 text-sm text-gray-400">Rendering diagram…</div>}
       <div ref={containerRef} className="w-full p-4" />
     </div>
-  )
+  );
 }

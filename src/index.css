@@ -48,8 +48,8 @@
   --color-blockquote-border: #60a5fa;
   --color-blockquote-text: #4b5563;
   --color-divider: #d1d5db;
-  --color-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-  --color-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --color-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --color-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --color-table-header-bg: #e5e7eb;
   --color-table-header-text: #374151;
   --color-table-border: #d1d5db;
@@ -63,9 +63,9 @@
   --color-unsaved-text: #92400e;
   /* Highlight palette — overridden per theme */
   --color-highlight-yellow: #fef08a;
-  --color-highlight-green:  #bbf7d0;
-  --color-highlight-red:    #fecaca;
-  --color-highlight-blue:   #bfdbfe;
+  --color-highlight-green: #bbf7d0;
+  --color-highlight-red: #fecaca;
+  --color-highlight-blue: #bfdbfe;
   --color-highlight-purple: #e9d5ff;
   /* Text drawn inside any <mark> — must contrast against the highlight bg */
   --color-highlight-text: #111827;
@@ -94,17 +94,37 @@
 .tiptap-content h3 {
   @apply text-base font-semibold text-muted uppercase tracking-wide mt-4 mb-2;
 }
-.tiptap-content p  { @apply mb-3; }
-.tiptap-content ul { @apply list-disc mb-3 space-y-1 pl-5; }
-.tiptap-content ol { @apply list-decimal mb-3 space-y-1 pl-5; }
-.tiptap-content li { @apply leading-relaxed; }
-.tiptap-content li > p { @apply m-0 inline; }
+.tiptap-content p {
+  @apply mb-3;
+}
+.tiptap-content ul {
+  @apply list-disc mb-3 space-y-1 pl-5;
+}
+.tiptap-content ol {
+  @apply list-decimal mb-3 space-y-1 pl-5;
+}
+.tiptap-content li {
+  @apply leading-relaxed;
+}
+.tiptap-content li > p {
+  @apply m-0 inline;
+}
 .tiptap-content li > ul,
-.tiptap-content li > ol { @apply mt-1 mb-0; }
-.tiptap-content strong { @apply font-semibold; }
-.tiptap-content em { @apply italic; }
-.tiptap-content u  { @apply underline; }
-.tiptap-content s  { @apply line-through; }
+.tiptap-content li > ol {
+  @apply mt-1 mb-0;
+}
+.tiptap-content strong {
+  @apply font-semibold;
+}
+.tiptap-content em {
+  @apply italic;
+}
+.tiptap-content u {
+  @apply underline;
+}
+.tiptap-content s {
+  @apply line-through;
+}
 .tiptap-content code {
   @apply bg-code-inline-bg text-code-inline-text text-sm px-1.5 py-0.5 rounded font-mono;
 }
@@ -118,7 +138,9 @@
   @apply border-l-4 border-blockquote-border pl-4 italic text-blockquote-text mb-3
          bg-primary-50 py-2 rounded-r-lg;
 }
-.tiptap-content hr { @apply border-divider my-4; }
+.tiptap-content hr {
+  @apply border-divider my-4;
+}
 .tiptap-content mark {
   @apply rounded px-0.5;
   /* !important beats TipTap's inline "color: inherit" */
@@ -135,15 +157,21 @@
 .tiptap-content td {
   @apply relative px-3 py-2 border border-table-border align-top min-w-[2rem];
 }
-.tiptap-content tbody tr:nth-child(odd) td  { background-color: var(--color-table-row-odd); }
-.tiptap-content tbody tr:nth-child(even) td { background-color: var(--color-table-row-even); }
+.tiptap-content tbody tr:nth-child(odd) td {
+  background-color: var(--color-table-row-odd);
+}
+.tiptap-content tbody tr:nth-child(even) td {
+  background-color: var(--color-table-row-even);
+}
 .tiptap-content .selectedCell:after {
   content: '';
   @apply absolute inset-0 bg-primary-100 opacity-50 pointer-events-none z-10;
 }
 
 /* ── Markdown viewer ── */
-.md-content { @apply leading-relaxed text-foreground; }
+.md-content {
+  @apply leading-relaxed text-foreground;
+}
 
 .md-content h1 {
   @apply text-2xl font-extrabold text-foreground mt-6 mb-3 pb-2 border-b-2 border-primary-500;
@@ -154,20 +182,38 @@
 .md-content h3 {
   @apply text-base font-semibold text-muted uppercase tracking-wide mt-4 mb-2;
 }
-.md-content p  { @apply mb-3 leading-relaxed; }
-.md-content ul { @apply list-disc mb-3 space-y-1 pl-5; }
-.md-content ol { @apply list-decimal mb-3 space-y-1 pl-5; }
-.md-content li { @apply leading-relaxed; }
+.md-content p {
+  @apply mb-3 leading-relaxed;
+}
+.md-content ul {
+  @apply list-disc mb-3 space-y-1 pl-5;
+}
+.md-content ol {
+  @apply list-decimal mb-3 space-y-1 pl-5;
+}
+.md-content li {
+  @apply leading-relaxed;
+}
 .md-content li > ul,
-.md-content li > ol { @apply mt-1 mb-0; }
-.md-content strong { @apply font-semibold text-foreground; }
-.md-content em { @apply italic; }
-.md-content s  { @apply line-through; }
+.md-content li > ol {
+  @apply mt-1 mb-0;
+}
+.md-content strong {
+  @apply font-semibold text-foreground;
+}
+.md-content em {
+  @apply italic;
+}
+.md-content s {
+  @apply line-through;
+}
 .md-content blockquote {
   @apply border-l-4 border-blockquote-border pl-4 italic text-blockquote-text mb-3
          bg-primary-50 py-2 rounded-r-lg;
 }
-.md-content hr { @apply border-divider my-5; }
+.md-content hr {
+  @apply border-divider my-5;
+}
 .md-content mark {
   /* !important beats TipTap's inline "color: inherit" */
   color: var(--color-highlight-text) !important;
@@ -183,21 +229,37 @@
 .md-content td {
   @apply px-3 py-2 border border-table-border align-top;
 }
-.md-content tbody tr:nth-child(odd) td  { background-color: var(--color-table-row-odd); }
-.md-content tbody tr:nth-child(even) td { background-color: var(--color-table-row-even); }
+.md-content tbody tr:nth-child(odd) td {
+  background-color: var(--color-table-row-odd);
+}
+.md-content tbody tr:nth-child(even) td {
+  background-color: var(--color-table-row-even);
+}
 
 /* Editor area */
 .ProseMirror {
   @apply outline-none min-h-[200px] p-4 overflow-x-auto;
 }
-.ProseMirror.ProseMirror-focused { @apply outline-none; }
+.ProseMirror.ProseMirror-focused {
+  @apply outline-none;
+}
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   @apply text-placeholder pointer-events-none float-left h-0;
 }
 
-mark[data-color="#fef08a"] { background-color: var(--color-highlight-yellow)  !important; }
-mark[data-color="#bbf7d0"] { background-color: var(--color-highlight-green)   !important; }
-mark[data-color="#fecaca"] { background-color: var(--color-highlight-red)     !important; }
-mark[data-color="#bfdbfe"] { background-color: var(--color-highlight-blue)    !important; }
-mark[data-color="#e9d5ff"] { background-color: var(--color-highlight-purple)  !important; }
+mark[data-color='#fef08a'] {
+  background-color: var(--color-highlight-yellow) !important;
+}
+mark[data-color='#bbf7d0'] {
+  background-color: var(--color-highlight-green) !important;
+}
+mark[data-color='#fecaca'] {
+  background-color: var(--color-highlight-red) !important;
+}
+mark[data-color='#bfdbfe'] {
+  background-color: var(--color-highlight-blue) !important;
+}
+mark[data-color='#e9d5ff'] {
+  background-color: var(--color-highlight-purple) !important;
+}

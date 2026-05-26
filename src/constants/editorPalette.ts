@@ -17,13 +17,13 @@
  */
 
 export interface PaletteColor {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
 export interface NullablePaletteColor {
-  label: string
-  value: string | null
+  label: string;
+  value: string | null;
 }
 
 /**
@@ -32,11 +32,11 @@ export interface NullablePaletteColor {
  */
 export const HIGHLIGHT_COLORS: PaletteColor[] = [
   { label: 'Yellow', value: '#fef08a' },
-  { label: 'Green',  value: '#bbf7d0' },
-  { label: 'Red',    value: '#fecaca' },
-  { label: 'Blue',   value: '#bfdbfe' },
+  { label: 'Green', value: '#bbf7d0' },
+  { label: 'Red', value: '#fecaca' },
+  { label: 'Blue', value: '#bfdbfe' },
   { label: 'Violet', value: '#e9d5ff' },
-]
+];
 
 /**
  * Foreground text colours shown in the toolbar palette picker.
@@ -44,9 +44,9 @@ export const HIGHLIGHT_COLORS: PaletteColor[] = [
  * Applied via TipTap's Color extension as color.
  */
 export const TEXT_COLORS: NullablePaletteColor[] = [
-  { label: 'Default', value: null     },
-  { label: 'Red',     value: '#ef4444' },
-  { label: 'Green',   value: '#22c55e' },
-  { label: 'Blue',    value: '#3b82f6' },
-  { label: 'Violet',  value: '#8b5cf6' },
-]
+  { label: 'Default', value: null },
+  { label: 'Red', value: '#ef4444' },
+  { label: 'Green', value: '#22c55e' },
+  { label: 'Blue', value: '#3b82f6' },
+  { label: 'Violet', value: '#8b5cf6' },
+];

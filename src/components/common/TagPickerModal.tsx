@@ -1,79 +1,82 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { tagsApi } from '@/api/tags'
-import type { Tag, TagCreateRequest } from '@/types'
-import { Plus, Pencil, Loader2, Check, X } from 'lucide-react'
-import ModalShell from './ModalShell'
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { tagsApi } from '@/api/tags';
+import type { Tag, TagCreateRequest } from '@/types';
+import { Plus, Pencil, Loader2, Check, X } from 'lucide-react';
+import ModalShell from './ModalShell';
 
 interface Props {
-  languageId: number
-  selectedTagIds: number[]
-  onClose: (selectedIds: number[]) => void
+  languageId: number;
+  selectedTagIds: number[];
+  onClose: (selectedIds: number[]) => void;
 }
 
 export default function TagPickerModal({ languageId, selectedTagIds, onClose }: Props) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const [localSelectedIds, setLocalSelectedIds] = useState<number[]>(selectedTagIds)
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [showAdd, setShowAdd] = useState(false)
-  const [formName, setFormName] = useState('')
-  const [formError, setFormError] = useState('')
+  const [localSelectedIds, setLocalSelectedIds] = useState<number[]>(selectedTagIds);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [formName, setFormName] = useState('');
+  const [formError, setFormError] = useState('');
 
   const { data: tags = [], isLoading } = useQuery({
     queryKey: ['tags', languageId],
     queryFn: () => tagsApi.getAll(languageId),
     enabled: Boolean(languageId),
-  })
+  });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tags'] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tags'] });
 
   const createMutation = useMutation({
     mutationFn: (data: TagCreateRequest) => tagsApi.create(languageId, data),
     onSuccess: (created) => {
-      invalidate()
-      setLocalSelectedIds((prev) => [...prev, created.id])
-      resetForm()
+      invalidate();
+      setLocalSelectedIds((prev) => [...prev, created.id]);
+      resetForm();
     },
     onError: (e: Error) => setFormError(e.message),
-  })
+  });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: TagCreateRequest }) =>
-      tagsApi.update(languageId, id, data),
-    onSuccess: () => { invalidate(); resetForm() },
+    mutationFn: ({ id, data }: { id: number; data: TagCreateRequest }) => tagsApi.update(languageId, id, data),
+    onSuccess: () => {
+      invalidate();
+      resetForm();
+    },
     onError: (e: Error) => setFormError(e.message),
-  })
+  });
 
   const resetForm = () => {
-    setFormName('')
-    setEditingId(null)
-    setShowAdd(false)
-    setFormError('')
-  }
+    setFormName('');
+    setEditingId(null);
+    setShowAdd(false);
+    setFormError('');
+  };
 
   const startEdit = (tag: Tag) => {
-    setEditingId(tag.id)
-    setFormName(tag.name)
-    setShowAdd(false)
-    setFormError('')
-  }
+    setEditingId(tag.id);
+    setFormName(tag.name);
+    setShowAdd(false);
+    setFormError('');
+  };
 
   const handleSave = () => {
-    if (!formName.trim()) { setFormError('Name is required'); return }
-    const payload: TagCreateRequest = { name: formName.trim() }
-    if (editingId !== null) {
-      updateMutation.mutate({ id: editingId, data: payload })
-    } else {
-      createMutation.mutate(payload)
+    if (!formName.trim()) {
+      setFormError('Name is required');
+      return;
     }
-  }
+    const payload: TagCreateRequest = { name: formName.trim() };
+    if (editingId !== null) {
+      updateMutation.mutate({ id: editingId, data: payload });
+    } else {
+      createMutation.mutate(payload);
+    }
+  };
 
   const toggleTag = (id: number) => {
-    setLocalSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
-  }
+    setLocalSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
 
   const footer = (
     <div className="flex justify-end">
@@ -86,7 +89,7 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
         Done
       </button>
     </div>
-  )
+  );
 
   return (
     <ModalShell title="Tags" onClose={() => onClose(localSelectedIds)} maxWidth="md" footer={footer}>
@@ -167,16 +170,16 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
         )}
       </div>
     </ModalShell>
-  )
+  );
 }
 
 interface InlineChipFormProps {
-  value: string
-  onChange: (v: string) => void
-  onSave: () => void
-  onCancel: () => void
-  isPending: boolean
-  error: string
+  value: string;
+  onChange: (v: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  isPending: boolean;
+  error: string;
 }
 
 function InlineChipForm({ value, onChange, onSave, onCancel, isPending, error }: InlineChipFormProps) {
@@ -189,8 +192,8 @@ function InlineChipForm({ value, onChange, onSave, onCancel, isPending, error }:
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave()
-            if (e.key === 'Escape') onCancel()
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
           }}
           placeholder="Tag name…"
           className="w-28 rounded border border-primary-400 px-2 py-0.5 text-xs text-foreground
@@ -217,5 +220,5 @@ function InlineChipForm({ value, onChange, onSave, onCancel, isPending, error }:
       </div>
       {error && <p className="text-error text-[10px]">{error}</p>}
     </div>
-  )
+  );
 }

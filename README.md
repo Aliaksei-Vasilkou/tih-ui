@@ -13,7 +13,9 @@ communicates with the [tih-app](../tih-app) backend REST API.
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
 - [Available Scripts](#available-scripts)
+- [Testing](#testing)
 - [Backend Proxy](#backend-proxy)
+- [Diagram Support](#diagram-support)
 - [Pages & Routing](#pages--routing)
 
 ---
@@ -53,7 +55,7 @@ Core features:
 | Diagram rendering | Mermaid v11 · PlantUML (server-rendered via plantuml.com) |
 | Icons             | Lucide React                                              |
 | File upload       | React Dropzone                                            |
-| Linting           | ESLint + TypeScript ESLint                                |
+| Linting           | ESLint 8 + TypeScript ESLint + eslint-plugin-react        |
 | Formatting        | Prettier                                                  |
 
 ---
@@ -66,23 +68,45 @@ src/
 │   ├── client.ts          # Axios instance (base URL /api/v1, error interceptor)
 │   ├── categories.ts
 │   ├── languages.ts
-│   └── questions.ts
+│   ├── questions.ts
+│   └── tags.ts
 ├── components/
 │   ├── common/
-│   │   ├── BatchUpload.tsx   # Drag-and-drop JSON import
-│   │   └── FilterPanel.tsx   # Language / category filter sidebar
+│   │   ├── BatchExport.tsx
+│   │   ├── BatchUpload.tsx       # Drag-and-drop JSON import
+│   │   ├── DeleteConfirmDialog.tsx
+│   │   ├── FilterPanel.tsx       # Language / category filter sidebar
+│   │   ├── HighlightText.tsx
+│   │   ├── InlineNameForm.tsx
+│   │   ├── LanguageSelector.tsx
+│   │   ├── ManageCategoriesModal.tsx
+│   │   ├── ManageLanguagesModal.tsx
+│   │   ├── ManageTagsModal.tsx
+│   │   ├── MarkdownViewer.tsx
+│   │   ├── MermaidDiagram.tsx
+│   │   ├── ModalShell.tsx
+│   │   ├── PageError.tsx
+│   │   ├── PageLoader.tsx
+│   │   ├── PlantUmlDiagram.tsx
+│   │   ├── Select.tsx
+│   │   ├── TagPickerModal.tsx
+│   │   └── UnsavedChangesDialog.tsx
 │   ├── editor/
 │   │   ├── EditorToolbar.tsx
 │   │   └── RichTextEditor.tsx
 │   ├── layout/
 │   │   ├── Header.tsx
-│   │   └── Layout.tsx
+│   │   ├── Layout.tsx
+│   │   └── ThemeSwitcher.tsx
 │   ├── question/
 │   │   ├── QuestionCard.tsx
 │   │   └── QuestionForm.tsx
 │   └── search/
 │       ├── SearchBox.tsx
 │       └── SearchResults.tsx
+├── constants/
+│   ├── editorPalette.ts   # Colour tokens for the rich-text editor toolbar
+│   └── languageColors.ts  # Badge colour map per programming language
 ├── hooks/
 │   ├── useDebounce.ts
 │   └── useSearch.ts
@@ -92,9 +116,20 @@ src/
 │   ├── QuestionDetailPage.tsx
 │   └── SearchPage.tsx
 ├── store/
-│   └── filterStore.ts     # Zustand store for active language / category filters
+│   ├── filterStore.ts     # Active language / category filters
+│   ├── themeStore.ts      # Active theme + persistence
+│   └── uiStore.ts         # Transient UI flags (upload / export panels)
+├── test/
+│   ├── renderWithProviders.tsx
+│   ├── renderWithRoute.tsx
+│   └── setup.ts
+├── themes/
+│   ├── applyTheme.ts      # Writes CSS custom properties onto :root
+│   └── types.ts
 ├── types/
-│   └── index.ts
+│   └── index.ts           # All domain and request/response types
+├── utils/
+│   └── format.ts          # formatDate helper
 ├── App.tsx
 ├── main.tsx
 └── index.css
@@ -138,13 +173,49 @@ npm run preview      # serve the production build locally
 
 ## Available Scripts
 
-| Script            | Description                                                       |
-|-------------------|-------------------------------------------------------------------|
-| `npm run dev`     | Start the Vite dev server on port `5173` with HMR                 |
-| `npm run build`   | Type-check with `tsc` then produce a production bundle in `dist/` |
-| `npm run preview` | Serve the production build locally for testing                    |
-| `npm run lint`    | Run ESLint across all `.ts` / `.tsx` files                        |
-| `npm run format`  | Auto-format all source files with Prettier                        |
+| Script                  | Description                                                       |
+|-------------------------|-------------------------------------------------------------------|
+| `npm run dev`           | Start the Vite dev server on port `5173` with HMR                 |
+| `npm run build`         | Type-check with `tsc` then produce a production bundle in `dist/` |
+| `npm run preview`       | Serve the production build locally for testing                    |
+| `npm run lint`          | Run ESLint across all `.ts` / `.tsx` files                        |
+| `npm run format`        | Auto-format all source files with Prettier                        |
+| `npm test`              | Run all unit tests with Vitest                                    |
+| `npm run test:ui`       | Run tests with interactive Vitest UI                              |
+| `npm run test:coverage` | Generate test coverage report                                     |
+
+---
+
+## Testing
+
+The project uses **Vitest** and **React Testing Library** for unit testing.
+
+### Running Tests
+
+```bash
+# Run all tests once
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with interactive UI
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Test Coverage
+
+The test suite covers:
+
+- ✅ **Core business logic** — utilities, custom hooks, Zustand stores (100% coverage)
+- ✅ **UI components** — search, filters, forms, dialogs
+- ✅ **Page workflows** — create, edit, view, delete questions
+- ✅ **Edge cases** — validation, empty states, error handling, async flows
+
+Test files are co-located with source files using the `.test.ts` / `.test.tsx` suffix.
 
 ---
 
@@ -162,15 +233,19 @@ Browser → http://localhost:5173/api/v1/...
 This is configured in `vite.config.ts`:
 
 ```ts
-server: {
-  port: 5173,
-  proxy: {
-    '/api': {
-      target: 'http://localhost:8080',
-      changeOrigin: true,
+// vite.config.ts
+export default defineConfig({
+    // ...
+    server: {
+        port: 5173,
+        proxy: {
+            "/api": {
+                target: "http://localhost:8080",
+                changeOrigin: true,
+            },
+        },
     },
-  },
-},
+})
 ```
 
 If the backend runs on a different port, update the `target` value in `vite.config.ts`.

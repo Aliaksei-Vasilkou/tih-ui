@@ -1,11 +1,11 @@
-import { Loader2 } from 'lucide-react'
-import ModalShell from './ModalShell'
+import { Loader2 } from 'lucide-react';
+import ModalShell from './ModalShell';
 
 interface DeleteConfirmDialogProps {
-  itemLabel?: string
-  isDeleting: boolean
-  onConfirm: () => void
-  onCancel: () => void
+  itemLabel?: string;
+  isDeleting: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export default function DeleteConfirmDialog({
@@ -43,5 +43,5 @@ export default function DeleteConfirmDialog({
         </div>
       </div>
     </ModalShell>
-  )
+  );
 }
