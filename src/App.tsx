@@ -1,18 +1,18 @@
-import { useEffect, lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
-import Layout from '@/components/layout/Layout'
-import { useThemeStore } from '@/store/themeStore'
-import { Loader2 } from 'lucide-react'
+import { useEffect, lazy, Suspense } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import { useThemeStore } from '@/store/themeStore';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Route-level code splitting — each page is a separate async chunk downloaded
  * only when the user navigates to that route for the first time.
  * The editor-heavy Create/Edit pages (TipTap ~350 KB) are never loaded on initial visit.
  */
-const SearchPage         = lazy(() => import('@/pages/SearchPage'))
-const QuestionDetailPage = lazy(() => import('@/pages/QuestionDetailPage'))
-const CreateQuestionPage = lazy(() => import('@/pages/CreateQuestionPage'))
-const EditQuestionPage   = lazy(() => import('@/pages/EditQuestionPage'))
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const QuestionDetailPage = lazy(() => import('@/pages/QuestionDetailPage'));
+const CreateQuestionPage = lazy(() => import('@/pages/CreateQuestionPage'));
+const EditQuestionPage = lazy(() => import('@/pages/EditQuestionPage'));
 
 function PageLoader() {
   return (
@@ -20,7 +20,7 @@ function PageLoader() {
       <Loader2 className="w-8 h-8 animate-spin mr-3" />
       <span className="text-lg">Loading…</span>
     </div>
-  )
+  );
 }
 
 function withSuspense(Component: React.ComponentType) {
@@ -28,7 +28,7 @@ function withSuspense(Component: React.ComponentType) {
     <Suspense fallback={<PageLoader />}>
       <Component />
     </Suspense>
-  )
+  );
 }
 
 const router = createBrowserRouter([
@@ -37,20 +37,20 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Navigate to="/search" replace /> },
-      { path: 'search',             element: withSuspense(SearchPage) },
-      { path: 'questions/new',      element: withSuspense(CreateQuestionPage) },
-      { path: 'questions/:id',      element: withSuspense(QuestionDetailPage) },
+      { path: 'search', element: withSuspense(SearchPage) },
+      { path: 'questions/new', element: withSuspense(CreateQuestionPage) },
+      { path: 'questions/:id', element: withSuspense(QuestionDetailPage) },
       { path: 'questions/:id/edit', element: withSuspense(EditQuestionPage) },
     ],
   },
-])
+]);
 
 export default function App() {
-  const initTheme = useThemeStore((s) => s.init)
+  const initTheme = useThemeStore((s) => s.init);
 
   useEffect(() => {
-    initTheme()
-  }, [initTheme])
+    initTheme();
+  }, [initTheme]);
 
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }

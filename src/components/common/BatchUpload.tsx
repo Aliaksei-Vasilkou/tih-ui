@@ -1,10 +1,10 @@
-import { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { questionsApi } from '@/api/questions'
-import type { BatchUploadResponse } from '@/types'
-import { UploadCloud, FileJson, CheckCircle2, XCircle, SkipForward, Loader2, AlertCircle } from 'lucide-react'
-import clsx from 'clsx'
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { questionsApi } from '@/api/questions';
+import type { BatchUploadResponse } from '@/types';
+import { UploadCloud, FileJson, CheckCircle2, XCircle, SkipForward, Loader2, AlertCircle } from 'lucide-react';
+import clsx from 'clsx';
 
 /**
  * react-dropzone checks both MIME type and extension.
@@ -15,38 +15,42 @@ import clsx from 'clsx'
  */
 const ACCEPT_JSON = {
   'application/json': ['.json'],
-  'text/json':        ['.json'],
-  'text/plain':       ['.json'],
-}
+  'text/json': ['.json'],
+  'text/plain': ['.json'],
+};
 
 export default function BatchUpload() {
-  const queryClient = useQueryClient()
-  const [result, setResult] = useState<BatchUploadResponse | null>(null)
-  const [uploadError, setUploadError] = useState<string | null>(null)
+  const queryClient = useQueryClient();
+  const [result, setResult] = useState<BatchUploadResponse | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const mutation = useMutation<BatchUploadResponse, Error, File>({
     mutationFn: (file: File) => questionsApi.batchUpload(file),
     onSuccess: (data) => {
-      setResult(data)
-      setUploadError(null)
-      queryClient.invalidateQueries({ queryKey: ['questions'] })
+      setResult(data);
+      setUploadError(null);
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
     },
     onError: (err: Error) => {
-      setResult(null)
-      setUploadError(err.message)
+      setResult(null);
+      setUploadError(err.message);
     },
-  })
+  });
 
   const onDrop = useCallback(
     (accepted: File[]) => {
-      if (accepted[0]) { setResult(null); setUploadError(null); mutation.mutate(accepted[0]) }
+      if (accepted[0]) {
+        setResult(null);
+        setUploadError(null);
+        mutation.mutate(accepted[0]);
+      }
     },
-    [mutation],
-  )
+    [mutation]
+  );
 
   const onDropRejected = useCallback(() => {
-    setUploadError('File rejected. Please select a valid .json file.')
-  }, [])
+    setUploadError('File rejected. Please select a valid .json file.');
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -54,9 +58,9 @@ export default function BatchUpload() {
     accept: ACCEPT_JSON,
     maxFiles: 1,
     disabled: mutation.isPending,
-  })
+  });
 
-  const allOk = result && result.failureCount === 0 && result.skippedCount === 0
+  const allOk = result && result.failureCount === 0 && result.skippedCount === 0;
 
   return (
     <div className="space-y-4">
@@ -67,14 +71,16 @@ export default function BatchUpload() {
           isDragActive
             ? 'border-primary-500 bg-primary-50'
             : 'border-border-strong bg-surface-alt hover:border-primary-400 hover:bg-primary-50',
-          mutation.isPending && 'pointer-events-none opacity-60',
+          mutation.isPending && 'pointer-events-none opacity-60'
         )}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center gap-3 text-muted">
-          {mutation.isPending
-            ? <Loader2 className="w-10 h-10 animate-spin text-primary-500" />
-            : <UploadCloud className="w-10 h-10 text-primary-400" />}
+          {mutation.isPending ? (
+            <Loader2 className="w-10 h-10 animate-spin text-primary-500" />
+          ) : (
+            <UploadCloud className="w-10 h-10 text-primary-400" />
+          )}
           <div>
             <p className="font-medium text-foreground-secondary">
               {mutation.isPending ? 'Uploading…' : 'Drop a JSON file here'}
@@ -99,7 +105,7 @@ export default function BatchUpload() {
         <summary className="cursor-pointer hover:text-foreground-secondary">Expected JSON format</summary>
         <div className="mt-2 space-y-3">
           <pre className="bg-code-block-bg text-code-block-text rounded-lg p-4 text-xs overflow-x-auto leading-relaxed">
-{`[
+            {`[
   {
     "extId":    "optional-uuid",        // used for deduplication (optional)
     "question": "What is polymorphism?",
@@ -120,12 +126,12 @@ export default function BatchUpload() {
             </thead>
             <tbody className="text-muted divide-y divide-border">
               {[
-                ['extId',    'No',  'Stable external ID for deduplication — re-importing the same ID skips the row'],
+                ['extId', 'No', 'Stable external ID for deduplication — re-importing the same ID skips the row'],
                 ['question', 'Yes', 'Plain text of the interview question'],
-                ['answer',   'No',  'Markdown answer body — supports tables, code blocks, headings, bold, etc.'],
+                ['answer', 'No', 'Markdown answer body — supports tables, code blocks, headings, bold, etc.'],
                 ['language', 'Yes', 'Language code that must already exist (e.g. java, typescript)'],
                 ['category', 'Yes', 'Category name — created automatically if it does not exist for that language'],
-                ['tags',     'No',  'Array of tag names — created automatically if they do not exist for that language'],
+                ['tags', 'No', 'Array of tag names — created automatically if they do not exist for that language'],
               ].map(([field, req, desc]) => (
                 <tr key={field}>
                   <td className="py-1.5 pr-4 font-mono text-primary-600">{field}</td>
@@ -139,14 +145,14 @@ export default function BatchUpload() {
       </details>
 
       {result && (
-        <div className={clsx(
-          'rounded-xl border p-4 space-y-3',
-          allOk ? 'bg-success-bg border-success-light' : 'bg-warning-bg border-warning-border',
-        )}>
+        <div
+          className={clsx(
+            'rounded-xl border p-4 space-y-3',
+            allOk ? 'bg-success-bg border-success-light' : 'bg-warning-bg border-warning-border'
+          )}
+        >
           <div className="flex items-center gap-2 font-medium">
-            {allOk
-              ? <CheckCircle2 className="w-5 h-5 text-success" />
-              : <XCircle className="w-5 h-5 text-warning" />}
+            {allOk ? <CheckCircle2 className="w-5 h-5 text-success" /> : <XCircle className="w-5 h-5 text-warning" />}
             <span>
               {result.successCount} of {result.totalItems} imported
               {result.skippedCount > 0 && `, ${result.skippedCount} skipped`}
@@ -158,7 +164,9 @@ export default function BatchUpload() {
             <div>
               <p className="text-xs font-semibold text-error uppercase tracking-wide mb-1">Errors</p>
               <ul className="text-sm text-error list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto">
-                {result.errors.map((e, i) => <li key={i}>{e}</li>)}
+                {result.errors.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
               </ul>
             </div>
           )}
@@ -170,12 +178,14 @@ export default function BatchUpload() {
                 Skipped (already exist)
               </div>
               <ul className="text-sm text-warning list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto">
-                {result.skipped.map((s, i) => <li key={i}>{s}</li>)}
+                {result.skipped.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
               </ul>
             </div>
           )}
         </div>
       )}
     </div>
-  )
+  );
 }

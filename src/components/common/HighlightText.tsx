@@ -1,15 +1,15 @@
 interface HighlightTextProps {
-  text: string
-  query: string
+  text: string;
+  query: string;
 }
 
 export default function HighlightText({ text, query }: HighlightTextProps) {
-  if (!query.trim()) return <>{text}</>
+  if (!query.trim()) return <>{text}</>;
 
-  const words = query.trim().split(/\s+/).filter(Boolean)
-  const escaped = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
-  const regex = new RegExp(`(${escaped})`, 'gi')
-  const parts = text.split(regex)
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  const escaped = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  const parts = text.split(regex);
 
   return (
     <>
@@ -20,8 +20,8 @@ export default function HighlightText({ text, query }: HighlightTextProps) {
           </mark>
         ) : (
           part
-        ),
+        )
       )}
     </>
-  )
+  );
 }

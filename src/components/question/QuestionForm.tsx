@@ -1,143 +1,148 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useBlocker } from 'react-router-dom'
-import { languagesApi } from '@/api/languages'
-import { categoriesApi } from '@/api/categories'
-import { tagsApi } from '@/api/tags'
-import { questionsApi } from '@/api/questions'
-import type { Question, QuestionCreateRequest, Language, Category, Tag } from '@/types'
-import RichTextEditor from '@/components/editor/RichTextEditor'
-import ManageLanguagesModal from '@/components/common/ManageLanguagesModal'
-import ManageCategoriesModal from '@/components/common/ManageCategoriesModal'
-import TagPickerModal from '@/components/common/TagPickerModal'
-import Select from '@/components/common/Select'
-import UnsavedChangesDialog from '@/components/common/UnsavedChangesDialog'
-import { Loader2, Pencil, Settings2 } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useBlocker } from 'react-router-dom';
+import { languagesApi } from '@/api/languages';
+import { categoriesApi } from '@/api/categories';
+import { tagsApi } from '@/api/tags';
+import { questionsApi } from '@/api/questions';
+import type { Question, QuestionCreateRequest, Language, Category, Tag } from '@/types';
+import RichTextEditor from '@/components/editor/RichTextEditor';
+import ManageLanguagesModal from '@/components/common/ManageLanguagesModal';
+import ManageCategoriesModal from '@/components/common/ManageCategoriesModal';
+import TagPickerModal from '@/components/common/TagPickerModal';
+import Select from '@/components/common/Select';
+import UnsavedChangesDialog from '@/components/common/UnsavedChangesDialog';
+import { Loader2, Pencil, Settings2 } from 'lucide-react';
 
 interface QuestionFormProps {
-  initialData?: Question
-  title?: string
+  initialData?: Question;
+  title?: string;
 }
 
 export default function QuestionForm({ initialData, title }: QuestionFormProps) {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isEditing = Boolean(initialData)
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const isEditing = Boolean(initialData);
 
-  const [questionText, setQuestionText] = useState(initialData?.questionText ?? '')
-  const [answerContent, setAnswerContent] = useState(initialData?.answerContent ?? '')
-  const [languageId, setLanguageId] = useState<number | ''>(initialData?.languageId ?? '')
-  const [categoryId, setCategoryId] = useState<number | ''>(initialData?.categoryId ?? '')
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [showManageLangs, setShowManageLangs] = useState(false)
-  const [showManageCats, setShowManageCats] = useState(false)
-  const [showTagPicker, setShowTagPicker] = useState(false)
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
+  const [questionText, setQuestionText] = useState(initialData?.questionText ?? '');
+  const [answerContent, setAnswerContent] = useState(initialData?.answerContent ?? '');
+  const [languageId, setLanguageId] = useState<number | ''>(initialData?.languageId ?? '');
+  const [categoryId, setCategoryId] = useState<number | ''>(initialData?.categoryId ?? '');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showManageLangs, setShowManageLangs] = useState(false);
+  const [showManageCats, setShowManageCats] = useState(false);
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
-  const isDirtyRef = useRef(false)
-  const [isDirty, setIsDirty] = useState(false)
-  const hasInitializedTagsRef = useRef(false)
+  const isDirtyRef = useRef(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const hasInitializedTagsRef = useRef(false);
   // isSavingRef prevents the blocker from triggering during a successful save navigation
-  const isSavingRef = useRef(false)
+  const isSavingRef = useRef(false);
 
   const markDirty = useCallback(() => {
-    isDirtyRef.current = true
-    setIsDirty(true)
-  }, [])
+    isDirtyRef.current = true;
+    setIsDirty(true);
+  }, []);
 
   const { data: languages = [] as Language[] } = useQuery({
     queryKey: ['languages'],
     queryFn: languagesApi.getAll,
-  })
+  });
 
   const { data: categories = [] as Category[] } = useQuery({
     queryKey: ['categories', languageId],
     queryFn: () => categoriesApi.getAll(languageId || undefined),
     enabled: Boolean(languageId),
-  })
+  });
 
   const { data: availableTags = [] as Tag[] } = useQuery({
     queryKey: ['tags', languageId],
     queryFn: () => tagsApi.getAll(languageId as number),
     enabled: Boolean(languageId),
-  })
+  });
 
   useEffect(() => {
     if (isEditing && availableTags.length > 0 && !hasInitializedTagsRef.current) {
-      const initialTags = initialData?.tags ?? []
-      const ids = availableTags.filter((t) => initialTags.includes(t.name)).map((t) => t.id)
-      setSelectedTagIds(ids)
-      hasInitializedTagsRef.current = true
+      const initialTags = initialData?.tags ?? [];
+      const ids = availableTags.filter((t) => initialTags.includes(t.name)).map((t) => t.id);
+      setSelectedTagIds(ids);
+      hasInitializedTagsRef.current = true;
     }
-  }, [isEditing, availableTags, initialData?.tags])
+  }, [isEditing, availableTags, initialData?.tags]);
 
   useEffect(() => {
     if (!isEditing) {
-      setCategoryId('')
-      setSelectedTagIds([])
+      setCategoryId('');
+      setSelectedTagIds([]);
     }
-  }, [languageId, isEditing])
+  }, [languageId, isEditing]);
 
   const mutation = useMutation<Question, Error, QuestionCreateRequest>({
     mutationFn: (data: QuestionCreateRequest) =>
       isEditing ? questionsApi.update(initialData!.id, data) : questionsApi.create(data),
     onSuccess: (saved) => {
-      isDirtyRef.current = false
-      isSavingRef.current = false
-      queryClient.invalidateQueries({ queryKey: ['questions'] })
-      navigate(`/questions/${saved.id}`, { replace: true })
+      isDirtyRef.current = false;
+      isSavingRef.current = false;
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      navigate(`/questions/${saved.id}`, { replace: true });
     },
-    onError: () => { isSavingRef.current = false },
-  })
+    onError: () => {
+      isSavingRef.current = false;
+    },
+  });
 
-  const blockerFn = useCallback(() => isDirtyRef.current && !isSavingRef.current, [])
-  const blocker = useBlocker(blockerFn)
+  const blockerFn = useCallback(() => isDirtyRef.current && !isSavingRef.current, []);
+  const blocker = useBlocker(blockerFn);
 
   const validate = () => {
-    const errs: Record<string, string> = {}
-    if (!questionText.trim()) errs.questionText = 'Question text is required'
-    if (!languageId) errs.languageId = 'Please select a language'
-    if (!categoryId) errs.categoryId = 'Please select a category'
-    setErrors(errs)
-    return Object.keys(errs).length === 0
-  }
+    const errs: Record<string, string> = {};
+    if (!questionText.trim()) errs.questionText = 'Question text is required';
+    if (!languageId) errs.languageId = 'Please select a language';
+    if (!categoryId) errs.categoryId = 'Please select a category';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
-    isSavingRef.current = true
+    e.preventDefault();
+    if (!validate()) return;
+    isSavingRef.current = true;
     mutation.mutate({
       questionText: questionText.trim(),
       answerContent,
       languageId: Number(languageId),
       categoryId: Number(categoryId),
       tagIds: selectedTagIds,
-    })
-  }
+    });
+  };
 
   const handleSaveAndProceed = () => {
-    if (!validate()) { blocker.reset?.(); return }
-    isDirtyRef.current = false
-    setIsDirty(false)
-    isSavingRef.current = true
-    blocker.reset?.()
+    if (!validate()) {
+      blocker.reset?.();
+      return;
+    }
+    isDirtyRef.current = false;
+    setIsDirty(false);
+    isSavingRef.current = true;
+    blocker.reset?.();
     mutation.mutate({
       questionText: questionText.trim(),
       answerContent,
       languageId: Number(languageId),
       categoryId: Number(categoryId),
       tagIds: selectedTagIds,
-    })
-  }
+    });
+  };
 
   const handleTagPickerClose = (ids: number[]) => {
-    setSelectedTagIds(ids)
-    setShowTagPicker(false)
-    markDirty()
-    queryClient.invalidateQueries({ queryKey: ['tags', languageId] })
-  }
+    setSelectedTagIds(ids);
+    setShowTagPicker(false);
+    markDirty();
+    queryClient.invalidateQueries({ queryKey: ['tags', languageId] });
+  };
 
-  const selectedTags = availableTags.filter((t) => selectedTagIds.includes(t.id))
+  const selectedTags = availableTags.filter((t) => selectedTagIds.includes(t.id));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -156,7 +161,9 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
             <div className="flex items-center gap-1.5 flex-wrap justify-end">
               <span className="text-[11px] text-muted-light font-medium">Tags:</span>
               {selectedTags.map((tag) => (
-                <span key={tag.id} className="tag">{tag.name}</span>
+                <span key={tag.id} className="tag">
+                  {tag.name}
+                </span>
               ))}
               <button
                 type="button"
@@ -180,7 +187,10 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         <input
           type="text"
           value={questionText}
-          onChange={(e) => { setQuestionText(e.target.value); markDirty() }}
+          onChange={(e) => {
+            setQuestionText(e.target.value);
+            markDirty();
+          }}
           placeholder="Enter the interview question…"
           className="w-full rounded-lg border border-border-strong px-3 py-2 text-foreground bg-surface
                      placeholder-placeholder focus:outline-none focus:ring-2 focus:ring-primary-500
@@ -206,7 +216,10 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
           </div>
           <Select
             value={languageId}
-            onChange={(val) => { setLanguageId(val === '' ? '' : Number(val)); markDirty() }}
+            onChange={(val) => {
+              setLanguageId(val === '' ? '' : Number(val));
+              markDirty();
+            }}
             options={languages.map((l) => ({ value: l.id, label: l.name }))}
             placeholder="Select language…"
             className="w-full"
@@ -231,7 +244,10 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
           </div>
           <Select
             value={categoryId}
-            onChange={(val) => { setCategoryId(val === '' ? '' : Number(val)); markDirty() }}
+            onChange={(val) => {
+              setCategoryId(val === '' ? '' : Number(val));
+              markDirty();
+            }}
             options={categories.map((c) => ({ value: c.id, label: c.name }))}
             placeholder="Select category…"
             disabled={!languageId}
@@ -245,14 +261,15 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         <label className="block text-sm font-medium text-foreground-secondary mb-1">Answer</label>
         <RichTextEditor
           content={answerContent}
-          onChange={(val) => { setAnswerContent(val); markDirty() }}
+          onChange={(val) => {
+            setAnswerContent(val);
+            markDirty();
+          }}
           placeholder="Write the answer here. Use the toolbar to format and highlight key sections…"
         />
       </div>
 
-      {mutation.isError && (
-        <p className="text-error text-sm">{(mutation.error as Error).message}</p>
-      )}
+      {mutation.isError && <p className="text-error text-sm">{(mutation.error as Error).message}</p>}
 
       <div className="flex items-center gap-3 pt-2">
         <button
@@ -276,10 +293,7 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
 
       {showManageLangs && <ManageLanguagesModal onClose={() => setShowManageLangs(false)} />}
       {showManageCats && (
-        <ManageCategoriesModal
-          initialLanguageId={languageId || undefined}
-          onClose={() => setShowManageCats(false)}
-        />
+        <ManageCategoriesModal initialLanguageId={languageId || undefined} onClose={() => setShowManageCats(false)} />
       )}
       {showTagPicker && languageId && (
         <TagPickerModal
@@ -298,5 +312,5 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
         />
       )}
     </form>
-  )
+  );
 }

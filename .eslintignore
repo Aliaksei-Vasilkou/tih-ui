@@ -1,0 +1,10 @@
+src/tests
+src/test
+node_modules
+dist
+dist-ssr
+.vscode
+public
+*.test.jsx
+*.test.ts
+*.test.tsx

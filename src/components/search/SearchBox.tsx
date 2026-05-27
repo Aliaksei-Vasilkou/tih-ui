@@ -1,9 +1,9 @@
-import { Search, X } from 'lucide-react'
+import { Search, X } from 'lucide-react';
 
 interface SearchBoxProps {
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
 }
 
 export default function SearchBox({ value, onChange, placeholder = 'Search questions…' }: SearchBoxProps) {
@@ -32,5 +32,5 @@ export default function SearchBox({ value, onChange, placeholder = 'Search quest
         </button>
       )}
     </div>
-  )
+  );
 }

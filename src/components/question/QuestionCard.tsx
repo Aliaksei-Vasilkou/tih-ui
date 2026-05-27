@@ -1,16 +1,16 @@
-import { Link } from 'react-router-dom'
-import type { Question } from '@/types'
-import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '@/constants/languageColors'
-import clsx from 'clsx'
-import HighlightText from '@/components/common/HighlightText'
+import { Link } from 'react-router-dom';
+import type { Question } from '@/types';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '@/constants/languageColors';
+import clsx from 'clsx';
+import HighlightText from '@/components/common/HighlightText';
 
 interface QuestionCardProps {
-  question: Question
-  query?: string
+  question: Question;
+  query?: string;
 }
 
 export default function QuestionCard({ question, query = '' }: QuestionCardProps) {
-  const langColor = LANGUAGE_COLORS[question.languageCode] ?? DEFAULT_LANGUAGE_COLOR
+  const langColor = LANGUAGE_COLORS[question.languageCode] ?? DEFAULT_LANGUAGE_COLOR;
 
   return (
     <Link
@@ -30,10 +30,12 @@ export default function QuestionCard({ question, query = '' }: QuestionCardProps
             {question.categoryName}
           </span>
           {question.tags?.map((tag) => (
-            <span key={tag} className="tag">{tag}</span>
+            <span key={tag} className="tag">
+              {tag}
+            </span>
           ))}
         </div>
       </div>
     </Link>
-  )
+  );
 }

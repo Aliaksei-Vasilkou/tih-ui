@@ -1,11 +1,11 @@
-import { AlertTriangle, Loader2 } from 'lucide-react'
-import ModalShell from './ModalShell'
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import ModalShell from './ModalShell';
 
 interface UnsavedChangesDialogProps {
-  isSaving: boolean
-  onKeepEditing: () => void
-  onDiscard: () => void
-  onSave: () => void
+  isSaving: boolean;
+  onKeepEditing: () => void;
+  onDiscard: () => void;
+  onSave: () => void;
 }
 
 export default function UnsavedChangesDialog({
@@ -59,5 +59,5 @@ export default function UnsavedChangesDialog({
         </div>
       </div>
     </ModalShell>
-  )
+  );
 }

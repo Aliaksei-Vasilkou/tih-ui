@@ -1,15 +1,15 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { BookOpen, PlusCircle, Upload, Download, X } from 'lucide-react'
-import LanguageSelector from '@/components/common/LanguageSelector'
-import ThemeSwitcher from './ThemeSwitcher'
-import { useUIStore } from '@/store/uiStore'
-import clsx from 'clsx'
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { BookOpen, PlusCircle, Upload, Download, X } from 'lucide-react';
+import LanguageSelector from '@/components/common/LanguageSelector';
+import ThemeSwitcher from './ThemeSwitcher';
+import { useUIStore } from '@/store/uiStore';
+import clsx from 'clsx';
 
 export default function Header() {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
-  const isSearchPage = pathname === '/search' || pathname === '/'
-  const { showUpload, toggleUpload, showExport, toggleExport } = useUIStore()
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isSearchPage = pathname === '/search' || pathname === '/';
+  const { showUpload, toggleUpload, showExport, toggleExport } = useUIStore();
 
   return (
     <header className="bg-surface border-b border-border shadow-theme-sm sticky top-0 z-40">
@@ -46,7 +46,7 @@ export default function Header() {
                     'flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors',
                     showUpload
                       ? 'bg-surface-alt border-border-strong text-foreground'
-                      : 'border-border-strong text-muted hover:bg-surface-alt',
+                      : 'border-border-strong text-muted hover:bg-surface-alt'
                   )}
                 >
                   {showUpload ? <X className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
@@ -60,7 +60,7 @@ export default function Header() {
                     'flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors',
                     showExport
                       ? 'bg-surface-alt border-border-strong text-foreground'
-                      : 'border-border-strong text-muted hover:bg-surface-alt',
+                      : 'border-border-strong text-muted hover:bg-surface-alt'
                   )}
                 >
                   {showExport ? <X className="w-4 h-4" /> : <Download className="w-4 h-4" />}
@@ -72,5 +72,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

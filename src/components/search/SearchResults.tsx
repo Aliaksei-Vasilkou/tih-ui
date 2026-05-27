@@ -1,26 +1,19 @@
-import type { PageResponse, Question } from '@/types'
-import QuestionCard from '@/components/question/QuestionCard'
-import { ChevronLeft, ChevronRight, SearchX } from 'lucide-react'
-import PageLoader from '@/components/common/PageLoader'
+import type { PageResponse, Question } from '@/types';
+import QuestionCard from '@/components/question/QuestionCard';
+import { ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
+import PageLoader from '@/components/common/PageLoader';
 
 interface SearchResultsProps {
-  data?: PageResponse<Question>
-  isLoading: boolean
-  isError: boolean
-  query: string
-  page: number
-  onPageChange: (page: number) => void
+  data?: PageResponse<Question>;
+  isLoading: boolean;
+  isError: boolean;
+  query: string;
+  page: number;
+  onPageChange: (page: number) => void;
 }
 
-export default function SearchResults({
-  data,
-  isLoading,
-  isError,
-  query,
-  page,
-  onPageChange,
-}: SearchResultsProps) {
-  if (isLoading) return <PageLoader message="Searching…" />
+export default function SearchResults({ data, isLoading, isError, query, page, onPageChange }: SearchResultsProps) {
+  if (isLoading) return <PageLoader message="Searching…" />;
 
   if (isError) {
     return (
@@ -28,26 +21,29 @@ export default function SearchResults({
         <p className="text-lg font-medium">Failed to load results.</p>
         <p className="text-sm mt-1">Please try again.</p>
       </div>
-    )
+    );
   }
 
   if (!data || data.content.length === 0) {
     return (
       <div className="flex flex-col items-center py-20 text-muted-light gap-3">
         <SearchX className="w-12 h-12" />
-        <p className="text-lg font-medium">
-          {query ? `No results for "${query}"` : 'No questions found'}
-        </p>
+        <p className="text-lg font-medium">{query ? `No results for "${query}"` : 'No questions found'}</p>
         <p className="text-sm">Try different keywords or adjust the filters.</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted">
         {data.totalElements} question{data.totalElements !== 1 ? 's' : ''} found
-        {query && <> for <span className="font-medium text-foreground-secondary">"{query}"</span></>}
+        {query && (
+          <>
+            {' '}
+            for <span className="font-medium text-foreground-secondary">{`"${query}"`}</span>
+          </>
+        )}
       </p>
 
       <div className="space-y-1.5">
@@ -78,5 +74,5 @@ export default function SearchResults({
         </div>
       )}
     </div>
-  )
+  );
 }

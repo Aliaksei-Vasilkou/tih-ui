@@ -3,46 +3,46 @@
 // ──────────────────────────────────────────────
 
 export interface Language {
-  id: number
-  name: string
-  code: string
-  createdAt: string
-  updatedAt: string
-  createdBy: string
+  id: number;
+  name: string;
+  code: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }
 
 export interface Category {
-  id: number
-  name: string
-  languageId: number
-  languageName: string
-  languageCode: string
-  createdAt: string
-  updatedAt: string
-  createdBy: string
+  id: number;
+  name: string;
+  languageId: number;
+  languageName: string;
+  languageCode: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }
 
 export interface Tag {
-  id: number
-  name: string
-  languageId: number
-  languageName: string
-  languageCode: string
+  id: number;
+  name: string;
+  languageId: number;
+  languageName: string;
+  languageCode: string;
 }
 
 export interface Question {
-  id: number
-  questionText: string
-  answerContent: string
-  languageId: number
-  languageName: string
-  languageCode: string
-  categoryId: number
-  categoryName: string
-  tags: string[]
-  createdAt: string
-  updatedAt: string
-  createdBy: string
+  id: number;
+  questionText: string;
+  answerContent: string;
+  languageId: number;
+  languageName: string;
+  languageCode: string;
+  categoryId: number;
+  categoryName: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }
 
 // ──────────────────────────────────────────────
@@ -50,53 +50,53 @@ export interface Question {
 // ──────────────────────────────────────────────
 
 export interface PageResponse<T> {
-  content: T[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-  last: boolean
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
 
 export interface QuestionCreateRequest {
-  questionText: string
-  answerContent: string
-  languageId: number
-  categoryId: number
-  tagIds?: number[]
+  questionText: string;
+  answerContent: string;
+  languageId: number;
+  categoryId: number;
+  tagIds?: number[];
 }
 
 export interface LanguageCreateRequest {
-  name: string
-  code: string
+  name: string;
+  code: string;
 }
 
 export interface CategoryCreateRequest {
-  name: string
-  languageId: number
+  name: string;
+  languageId: number;
 }
 
 export interface TagCreateRequest {
-  name: string
+  name: string;
 }
 
 export interface BatchUploadResponse {
-  totalItems: number
-  successCount: number
-  failureCount: number
-  skippedCount: number
-  errors: string[]
-  skipped: string[]
+  totalItems: number;
+  successCount: number;
+  failureCount: number;
+  skippedCount: number;
+  errors: string[];
+  skipped: string[];
 }
 
 /** Unified import/export format — mirrors QuestionTransferItem on the backend */
 export interface QuestionTransferItem {
-  extId?: string
-  question: string
-  answer: string
-  language: string
-  category: string
-  tags: string[]
+  extId?: string;
+  question: string;
+  answer: string;
+  language: string;
+  category: string;
+  tags: string[];
 }
 
 // ──────────────────────────────────────────────
@@ -104,9 +104,9 @@ export interface QuestionTransferItem {
 // ──────────────────────────────────────────────
 
 export interface FilterState {
-  selectedLanguageId: number | null
-  selectedCategoryId: number | null
-  setLanguage: (id: number | null) => void
-  setCategory: (id: number | null) => void
-  reset: () => void
+  selectedLanguageId: number | null;
+  selectedCategoryId: number | null;
+  setLanguage: (id: number | null) => void;
+  setCategory: (id: number | null) => void;
+  reset: () => void;
 }
