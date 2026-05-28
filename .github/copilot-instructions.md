@@ -151,6 +151,17 @@ Language badge colours are in `src/constants/languageColors.ts` — extend that 
 
 ---
 
+## Accessibility
+
+All interactive components must include appropriate ARIA attributes, keyboard event handlers, and visible focus indicators.
+
+- Use semantic HTML elements (`<button>`, `<a>`, `<label>`) before reaching for `role` overrides.
+- Every interactive element that is not a native `<button>` or `<a>` must have a `role`, `aria-label` (or `aria-labelledby`), and `onKeyDown` / `onKeyUp` handlers for `Enter` and `Space`.
+- Visible focus rings must use the `ring-border-focus` token (e.g. `focus-visible:ring-2 focus-visible:ring-border-focus`). Never suppress focus outlines with `outline-none` alone.
+- Modal dialogs rendered via `<ModalShell>` must trap focus and restore it to the trigger element on close.
+
+---
+
 ## Routing (`src/App.tsx`)
 
 All routes live inside `<Layout>` (which renders `<Header>` + `<main><Outlet/></main>`).  
@@ -222,13 +233,12 @@ This project is configured for agent-assisted development. Use the agents and sk
 
 ### Custom agents (`.github/agents/`)
 
-| Agent file           | Role                                    | Handoff          |
-|----------------------|-----------------------------------------|------------------|
-| `plan.agent.md`      | Research & plan — read-only             | → implement      |
-| `implement.agent.md` | Write / edit code                       | → review or test |
-| `review.agent.md`    | Audit changes for convention compliance | → implement      |
-| `test.agent.md`      | Write Vitest + RTL tests                | → review         |
-| `lint.agent.md`      | Fix formatting & style only — no logic  | → review         |
+| Agent file                    | Role                                     | Handoff                          |
+|-------------------------------|------------------------------------------|----------------------------------|
+| `software-architect.agent.md` | Research & plan — read-only              | → react-developer                |
+| `react-developer.agent.md`    | Write / edit code, runs lint + build     | → code-reviewer / qa-engineer    |
+| `qa-engineer.agent.md`        | Write Vitest + RTL tests                 | → code-reviewer                  |
+| `code-reviewer.agent.md`      | Semantic review — read-only, no auto-fix | → react-developer                |
 
 ### Skills (`.github/skills/`)
 

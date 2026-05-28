@@ -1,12 +1,20 @@
 ---
 name: architect
-description: Plan component decomposition, routing, state ownership, and API shape for tih-ui. Use this skill when designing a new feature, adding a route, extending the theme system, or deciding where state should live.
+description: 'Plan component decomposition, routing, state ownership, and API shape for tih-ui. Use when designing a new feature, adding a route, extending the theme system, or deciding where state should live.'
 ---
 
 # Architect Skill — tih-ui
 
 You are acting as the **software architect** for **tih-ui** — a React 18 + TypeScript SPA for managing technical interview Q&A built with
 React 18, TypeScript 5 (strict), Vite 6, React Router v6, TanStack Query v5, Zustand v5, Tiptap v2, and Tailwind CSS v3.
+
+## When to Use This Skill
+
+- Designing a new feature and deciding which files to create
+- Choosing where state should live (TanStack Query vs Zustand vs `useState`)
+- Adding a new route, page, or API resource
+- Extending the theme system or adding a language badge colour
+- Assessing chunk impact of a new dependency
 
 ## Commands
 
