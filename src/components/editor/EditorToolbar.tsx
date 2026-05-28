@@ -1,7 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Editor } from '@tiptap/react';
 import clsx from 'clsx';
+import {
+  ChevronDown,
+  Highlighter,
+  Baseline,
+  List,
+  ListOrdered,
+  Table,
+  Link,
+  Braces,
+  CodeXml,
+  Quote,
+  ChartArea,
+} from 'lucide-react';
 import { HIGHLIGHT_COLORS, TEXT_COLORS } from '@/constants/editorPalette';
+
+// ─── Shared sub-components ───────────────────────────────────────────────────
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -21,7 +36,9 @@ function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps)
       title={title}
       className={clsx(
         'px-2 py-1 rounded text-sm font-medium transition-colors',
-        active ? 'bg-primary-100 text-primary-700' : 'text-muted hover:bg-surface-alt hover:text-foreground'
+        active
+          ? 'bg-toolbar-active-bg text-toolbar-active-text'
+          : 'text-muted hover:bg-surface-alt hover:text-foreground'
       )}
     >
       {children}
@@ -29,9 +46,433 @@ function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps)
   );
 }
 
-interface EditorToolbarProps {
+function Sep() {
+  return <div className="w-px h-5 bg-border-strong mx-1" />;
+}
+
+/** Closes a dropdown on outside mousedown. */
+function useOutsideClose(open: boolean, ref: React.RefObject<HTMLElement>, onClose: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open, ref, onClose]);
+}
+
+// ─── HeadingStyleDropdown ────────────────────────────────────────────────────
+
+interface HeadingStyleDropdownProps {
   editor: Editor;
 }
+
+function HeadingStyleDropdown({ editor }: HeadingStyleDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsideClose(open, ref, () => setOpen(false));
+
+  let currentStyle = 'Normal';
+  if (editor.isActive('heading', { level: 1 })) currentStyle = 'Heading 1';
+  else if (editor.isActive('heading', { level: 2 })) currentStyle = 'Heading 2';
+  else if (editor.isActive('heading', { level: 3 })) currentStyle = 'Heading 3';
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setOpen((v) => !v);
+        }}
+        title="Heading style"
+        className={clsx(
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center gap-1',
+          open
+            ? 'bg-toolbar-active-bg text-toolbar-active-text'
+            : 'text-muted hover:bg-surface-alt hover:text-foreground'
+        )}
+      >
+        {currentStyle}
+        <ChevronDown size={14} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-theme-md py-1 w-40">
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              editor.chain().focus().setParagraph().run();
+              setOpen(false);
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-surface-alt transition-colors text-foreground"
+          >
+            Normal
+          </button>
+          {([1, 2, 3] as const).map((level) => (
+            <button
+              key={level}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().toggleHeading({ level }).run();
+                setOpen(false);
+              }}
+              className={clsx(
+                'w-full text-left px-3 py-1.5 hover:bg-surface-alt transition-colors text-foreground font-bold',
+                level === 1 && 'text-xl',
+                level === 2 && 'text-lg',
+                level === 3 && 'text-base'
+              )}
+            >
+              Heading {level}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── HighlightDropdown ───────────────────────────────────────────────────────
+
+interface HighlightDropdownProps {
+  editor: Editor;
+}
+
+function HighlightDropdown({ editor }: HighlightDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsideClose(open, ref, () => setOpen(false));
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setOpen((v) => !v);
+        }}
+        title="Highlight colour"
+        className={clsx(
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center',
+          open
+            ? 'bg-toolbar-active-bg text-toolbar-active-text'
+            : 'text-muted hover:bg-surface-alt hover:text-foreground'
+        )}
+      >
+        <Highlighter size={18} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-theme-md p-2">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              title="Remove highlight"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().unsetHighlight().run();
+                setOpen(false);
+              }}
+              className="w-6 h-6 rounded border-2 border-border-strong bg-surface flex items-center justify-center text-muted text-xs hover:border-foreground transition-colors"
+            >
+              ✕
+            </button>
+            {HIGHLIGHT_COLORS.map((color) => (
+              <button
+                key={color.value}
+                type="button"
+                title={`Highlight: ${color.label}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  editor.chain().focus().toggleHighlight({ color: color.value }).run();
+                  setOpen(false);
+                }}
+                className={clsx(
+                  'w-6 h-6 rounded border-2 transition-transform hover:scale-110',
+                  editor.isActive('highlight', { color: color.value })
+                    ? 'border-foreground scale-110'
+                    : 'border-border-strong'
+                )}
+                style={{ backgroundColor: color.value }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── ColorDropdown ───────────────────────────────────────────────────────────
+
+interface ColorDropdownProps {
+  editor: Editor;
+}
+
+function ColorDropdown({ editor }: ColorDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsideClose(open, ref, () => setOpen(false));
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setOpen((v) => !v);
+        }}
+        title="Text colour"
+        className={clsx(
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center',
+          open
+            ? 'bg-toolbar-active-bg text-toolbar-active-text'
+            : 'text-muted hover:bg-surface-alt hover:text-foreground'
+        )}
+      >
+        <Baseline size={18} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-theme-md p-2">
+          <div className="flex gap-1">
+            {TEXT_COLORS.map((c) => {
+              if (c.value === null) {
+                return (
+                  <button
+                    key="reset"
+                    type="button"
+                    title="Remove colour"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      editor.chain().focus().unsetColor().run();
+                      setOpen(false);
+                    }}
+                    className="w-6 h-6 rounded border-2 border-border-strong bg-surface flex items-center justify-center text-muted text-xs hover:border-foreground transition-colors"
+                  >
+                    ✕
+                  </button>
+                );
+              }
+              const hexColor = c.value; // narrowed: string (not null)
+              return (
+                <button
+                  key={hexColor}
+                  type="button"
+                  title={`Text: ${c.label}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    editor.chain().focus().setColor(hexColor).run();
+                    setOpen(false);
+                  }}
+                  className={clsx(
+                    'w-6 h-6 rounded border-2 transition-transform hover:scale-110',
+                    editor.isActive('textStyle', { color: hexColor })
+                      ? 'border-foreground scale-110'
+                      : 'border-border-strong'
+                  )}
+                  style={{ backgroundColor: hexColor }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── ListsDropdown ───────────────────────────────────────────────────────────
+
+interface ListsDropdownProps {
+  editor: Editor;
+}
+
+function ListsDropdown({ editor }: ListsDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsideClose(open, ref, () => setOpen(false));
+
+  const isListActive = editor.isActive('bulletList') || editor.isActive('orderedList');
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setOpen((v) => !v);
+        }}
+        title="Lists"
+        className={clsx(
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center',
+          open || isListActive
+            ? 'bg-toolbar-active-bg text-toolbar-active-text'
+            : 'text-muted hover:bg-surface-alt hover:text-foreground'
+        )}
+      >
+        <List size={18} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-theme-md py-1 w-44">
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleBulletList().run();
+              setOpen(false);
+            }}
+            className={clsx(
+              'w-full text-left px-3 py-2 flex items-center gap-2 text-sm hover:bg-surface-alt transition-colors',
+              editor.isActive('bulletList') ? 'text-toolbar-active-text' : 'text-foreground'
+            )}
+          >
+            <List size={18} />
+            Bullet list
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleOrderedList().run();
+              setOpen(false);
+            }}
+            className={clsx(
+              'w-full text-left px-3 py-2 flex items-center gap-2 text-sm hover:bg-surface-alt transition-colors',
+              editor.isActive('orderedList') ? 'text-toolbar-active-text' : 'text-foreground'
+            )}
+          >
+            <ListOrdered size={18} />
+            Numbered list
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── LinkPopover ─────────────────────────────────────────────────────────────
+
+interface LinkPopoverProps {
+  editor: Editor;
+}
+
+/** Ensures a user-typed URL has an absolute protocol so it is never treated as a relative path. */
+function ensureAbsoluteUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (/^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed) || /^tel:/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
+function LinkPopover({ editor }: LinkPopoverProps) {
+  const [open, setOpen] = useState(false);
+  const [url, setUrl] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isActive = editor.isActive('link');
+
+  const closePopover = useCallback(() => setOpen(false), []);
+  useOutsideClose(open, ref, closePopover);
+
+  const openPopover = () => {
+    const currentHref = editor.getAttributes('link').href as string | undefined;
+    setUrl(currentHref ?? '');
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const apply = () => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    editor
+      .chain()
+      .focus()
+      .setLink({ href: ensureAbsoluteUrl(trimmed) })
+      .run();
+    setOpen(false);
+  };
+
+  const remove = () => {
+    editor.chain().focus().unsetLink().run();
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          openPopover();
+        }}
+        title="Insert / edit link"
+        className={clsx(
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center',
+          isActive || open
+            ? 'bg-toolbar-active-bg text-toolbar-active-text'
+            : 'text-muted hover:bg-surface-alt hover:text-foreground'
+        )}
+      >
+        <Link size={18} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-theme-md p-3 w-72">
+          <div className="text-xs font-medium text-muted mb-1.5">URL</div>
+          <input
+            ref={inputRef}
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                apply();
+              }
+              if (e.key === 'Escape') setOpen(false);
+            }}
+            placeholder="https://..."
+            className="w-full px-2 py-1.5 text-sm border border-border rounded bg-surface-alt text-foreground placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-border-focus focus:border-border-focus"
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                apply();
+              }}
+              disabled={!url.trim()}
+              className="flex-1 px-3 py-1 text-sm rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              Apply
+            </button>
+            {isActive && (
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  remove();
+                }}
+                className="px-3 py-1 text-sm rounded border border-error text-error hover:bg-error-bg transition-colors"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DiagramMenu ─────────────────────────────────────────────────────────────
 
 const DIAGRAM_OPTIONS = [
   {
@@ -59,15 +500,7 @@ const DIAGRAM_OPTIONS = [
 function DiagramMenu({ editor }: { editor: Editor }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  useOutsideClose(open, ref, () => setOpen(false));
 
   const insert = (opt: (typeof DIAGRAM_OPTIONS)[number]) => {
     editor
@@ -92,12 +525,13 @@ function DiagramMenu({ editor }: { editor: Editor }) {
         }}
         title="Insert diagram"
         className={clsx(
-          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center gap-1',
-          open ? 'bg-primary-100 text-primary-700' : 'text-muted hover:bg-surface-alt hover:text-foreground'
+          'px-2 py-1 rounded text-sm font-medium transition-colors flex items-center',
+          open
+            ? 'bg-toolbar-active-bg text-toolbar-active-text'
+            : 'text-muted hover:bg-surface-alt hover:text-foreground'
         )}
       >
-        ⬡ Diagram
-        <span className="text-[10px] opacity-60">▾</span>
+        <ChartArea size={18} />
       </button>
 
       {open && (
@@ -148,22 +582,25 @@ function DiagramMenu({ editor }: { editor: Editor }) {
   );
 }
 
+// ─── Main EditorToolbar ───────────────────────────────────────────────────────
+
+interface EditorToolbarProps {
+  editor: Editor;
+}
+
 export default function EditorToolbar({ editor }: EditorToolbarProps) {
   const inTable = editor.isActive('table');
 
   return (
     <div className="flex flex-col border-b border-border bg-surface-alt rounded-t-lg">
-      {/* ── Row 1: history + formatting controls ── */}
+      {/* ── Row 1: main formatting controls ── */}
       <div className="flex flex-wrap items-center gap-0.5 px-3 py-2">
-        <ToolbarButton onClick={() => editor.chain().focus().undo().run()} title="Undo (Ctrl+Z)">
-          ↩
-        </ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().redo().run()} title="Redo (Ctrl+Y)">
-          ↪
-        </ToolbarButton>
+        {/* 1. Heading style */}
+        <HeadingStyleDropdown editor={editor} />
 
-        <div className="w-px h-5 bg-border-strong mx-1" />
+        <Sep />
 
+        {/* 3. Font style: Bold · Italic · Underline · Strike */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive('bold')}
@@ -192,150 +629,66 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         >
           <span className="line-through">S</span>
         </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          active={editor.isActive('code')}
-          title="Inline code"
-        >
-          {'</>'}
-        </ToolbarButton>
 
-        <div className="w-px h-5 bg-border-strong mx-1" />
+        <Sep />
 
-        {([1, 2, 3] as const).map((level) => (
-          <ToolbarButton
-            key={level}
-            onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
-            active={editor.isActive('heading', { level })}
-            title={`Heading ${level}`}
-          >
-            H{level}
-          </ToolbarButton>
-        ))}
+        {/* 5–6. Colour dropdowns */}
+        <HighlightDropdown editor={editor} />
+        <ColorDropdown editor={editor} />
 
-        <div className="w-px h-5 bg-border-strong mx-1" />
+        <Sep />
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          active={editor.isActive('bulletList')}
-          title="Bullet list"
-        >
-          • List
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          active={editor.isActive('orderedList')}
-          title="Numbered list"
-        >
-          1. List
-        </ToolbarButton>
+        {/* 8. Lists dropdown */}
+        <ListsDropdown editor={editor} />
 
-        <div className="w-px h-5 bg-border-strong mx-1" />
+        <Sep />
 
+        {/* 10. Table */}
         <ToolbarButton
           onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
           active={inTable}
           title="Insert table"
         >
-          ⊞ Table
+          <Table size={18} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-border-strong mx-1" />
+        {/* 11. Diagram */}
+        <DiagramMenu editor={editor} />
 
+        {/* 12. Link */}
+        <LinkPopover editor={editor} />
+
+        <Sep />
+
+        {/* 14. Code block */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           active={editor.isActive('codeBlock')}
           title="Code block"
         >
-          Code block
+          <Braces size={18} />
         </ToolbarButton>
+
+        {/* 15. Inline code */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          active={editor.isActive('code')}
+          title="Inline code"
+        >
+          <CodeXml size={18} />
+        </ToolbarButton>
+
+        {/* 16. Blockquote */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           active={editor.isActive('blockquote')}
           title="Blockquote"
         >
-          ❝
+          <Quote size={18} />
         </ToolbarButton>
-
-        <div className="w-px h-5 bg-border-strong mx-1" />
-
-        <DiagramMenu editor={editor} />
       </div>
 
-      {/* ── Row 2: colour palettes ── */}
-      <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-border">
-        <span className="text-xs text-muted mr-1">Color:</span>
-        {TEXT_COLORS.map((c) =>
-          c.value === null ? (
-            <button
-              key="reset"
-              type="button"
-              title="Remove colour"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                editor.chain().focus().unsetColor().run();
-              }}
-              className="w-5 h-5 rounded border-2 border-border-strong bg-surface flex items-center
-                         justify-center text-muted text-xs hover:border-foreground transition-colors"
-            >
-              ✕
-            </button>
-          ) : (
-            <button
-              key={c.value}
-              type="button"
-              title={`Text: ${c.label}`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                editor.chain().focus().setColor(c.value!).run();
-              }}
-              className={clsx(
-                'w-5 h-5 rounded border-2 transition-transform hover:scale-110',
-                editor.isActive('textStyle', { color: c.value })
-                  ? 'border-foreground scale-110'
-                  : 'border-border-strong'
-              )}
-              style={{ backgroundColor: c.value }}
-            />
-          )
-        )}
-
-        <div className="w-px h-5 bg-border-strong mx-2" />
-
-        <span className="text-xs text-muted mr-1">Highlight:</span>
-        <button
-          type="button"
-          title="Remove highlight"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            editor.chain().focus().unsetHighlight().run();
-          }}
-          className="w-5 h-5 rounded border-2 border-border-strong bg-surface flex items-center
-                     justify-center text-muted text-xs hover:border-foreground transition-colors"
-        >
-          ✕
-        </button>
-        {HIGHLIGHT_COLORS.map((color) => (
-          <button
-            key={color.value}
-            type="button"
-            title={`Highlight: ${color.label}`}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              editor.chain().focus().toggleHighlight({ color: color.value }).run();
-            }}
-            className={clsx(
-              'w-5 h-5 rounded border-2 transition-transform hover:scale-110',
-              editor.isActive('highlight', { color: color.value })
-                ? 'border-foreground scale-110'
-                : 'border-border-strong'
-            )}
-            style={{ backgroundColor: color.value }}
-          />
-        ))}
-      </div>
-
-      {/* ── Row 3: table controls ── */}
+      {/* ── Row 3: table controls (unchanged) ── */}
       {inTable && (
         <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-border bg-primary-50">
           <span className="text-xs text-primary-500 font-medium mr-1">Table:</span>

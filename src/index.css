@@ -55,8 +55,8 @@
   --color-table-border: #d1d5db;
   --color-table-row-odd: #f9fafb;
   --color-table-row-even: #f3f4f6;
-  --color-toolbar-active-bg: #1f2937;
-  --color-toolbar-active-text: #ffffff;
+  --color-toolbar-active-bg: #dbeafe;
+  --color-toolbar-active-text: #1d4ed8;
   --color-diagram-menu-bg: #ffffff;
   --color-unsaved-bg: #fffbeb;
   --color-unsaved-border: #fde68a;
@@ -141,6 +141,9 @@
 .tiptap-content hr {
   @apply border-divider my-4;
 }
+.tiptap-content a {
+  @apply text-primary-600 underline hover:text-primary-700 transition-colors;
+}
 .tiptap-content mark {
   @apply rounded px-0.5;
   /* !important beats TipTap's inline "color: inherit" */
@@ -213,6 +216,9 @@
 }
 .md-content hr {
   @apply border-divider my-5;
+}
+.md-content a {
+  @apply text-primary-600 underline hover:text-primary-700 transition-colors;
 }
 .md-content mark {
   /* !important beats TipTap's inline "color: inherit" */
