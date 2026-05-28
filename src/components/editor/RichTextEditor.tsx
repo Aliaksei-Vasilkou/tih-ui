@@ -8,6 +8,7 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
+import Link from '@tiptap/extension-link';
 import { Markdown } from 'tiptap-markdown';
 import EditorToolbar from './EditorToolbar';
 import clsx from 'clsx';
@@ -38,6 +39,7 @@ export default function RichTextEditor({
       TableRow,
       TableCell,
       TableHeader,
+      Link.configure({ openOnClick: false, autolink: true }),
       Markdown.configure({
         html: true,
         transformPastedText: true,

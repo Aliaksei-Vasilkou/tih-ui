@@ -15,7 +15,23 @@ interface MarkdownViewerProps {
 const DIAGRAM_LANGS = new Set(['mermaid']);
 const PLANTUML_LANGS = new Set(['plantuml', 'puml']);
 
+/** Ensures hrefs stored without a protocol open as absolute URLs, not relative paths. */
+function ensureAbsoluteUrl(href: string | undefined): string | undefined {
+  if (!href) return href;
+  if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^tel:/i.test(href) || href.startsWith('#')) {
+    return href;
+  }
+  return `https://${href}`;
+}
+
 const components: Components = {
+  a({ href, children, ...props }) {
+    return (
+      <a href={ensureAbsoluteUrl(href)} target="_blank" rel="noopener noreferrer" {...props}>
+        {children}
+      </a>
+    );
+  },
   code({ className, children, ...props }) {
     const match = /language-(\w+)/.exec(className || '');
     const lang = match ? match[1].toLowerCase() : '';
