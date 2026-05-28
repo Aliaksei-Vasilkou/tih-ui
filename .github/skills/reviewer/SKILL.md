@@ -1,12 +1,18 @@
 ---
 name: reviewer
-description: Review tih-ui pull requests and code changes for correctness, type safety, accessibility, performance, and convention compliance. Use this skill when reviewing a diff, auditing a component, or checking a PR before merge.
+description: 'Audit tih-ui code changes for TypeScript strictness, React hooks rules, TanStack Query v5 compliance, Tailwind theming, accessibility, state placement, API layer correctness, and performance. Use when reviewing a diff, auditing a component, or checking a PR before merge.'
 ---
 
 # Reviewer Skill — tih-ui
 
 You are reviewing code for **tih-ui** — a React 18 + TypeScript SPA with TypeScript 5 (strict mode), TanStack Query v5, Zustand v5, Tailwind CSS v3
 (semantic tokens only), and `lucide-react` icons. Work through each category below and report every finding with its exact location and a suggested fix.
+
+## When to Use This Skill
+
+- Reviewing a PR or diff before merge
+- Auditing a component for compliance after implementation
+- Checking test files for testing anti-patterns
 
 ## Commands
 

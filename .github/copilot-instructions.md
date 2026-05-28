@@ -222,13 +222,12 @@ This project is configured for agent-assisted development. Use the agents and sk
 
 ### Custom agents (`.github/agents/`)
 
-| Agent file           | Role                                    | Handoff          |
-|----------------------|-----------------------------------------|------------------|
-| `plan.agent.md`      | Research & plan — read-only             | → implement      |
-| `implement.agent.md` | Write / edit code                       | → review or test |
-| `review.agent.md`    | Audit changes for convention compliance | → implement      |
-| `test.agent.md`      | Write Vitest + RTL tests                | → review         |
-| `lint.agent.md`      | Fix formatting & style only — no logic  | → review         |
+| Agent file                    | Role                                     | Handoff                          |
+|-------------------------------|------------------------------------------|----------------------------------|
+| `software-architect.agent.md` | Research & plan — read-only              | → react-developer                |
+| `react-developer.agent.md`    | Write / edit code, runs lint + build     | → code-reviewer / qa-engineer    |
+| `qa-engineer.agent.md`        | Write Vitest + RTL tests                 | → code-reviewer                  |
+| `code-reviewer.agent.md`      | Semantic review — read-only, no auto-fix | → react-developer                |
 
 ### Skills (`.github/skills/`)
 
