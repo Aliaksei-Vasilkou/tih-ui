@@ -1,16 +1,27 @@
 ---
 description: 'Implement features in tih-ui by writing and editing React 18 + TypeScript source files. Use after the Software Architect has produced an implementation plan.'
 name: 'React Developer'
-tools: ['read', 'edit', 'search', 'execute', 'get_errors', 'open_file']
+tools: [execute, read, edit, search]
 handoffs:
   - label: Review Changes
     agent: Code Reviewer
     prompt: 'Review all the changes just made for convention compliance, type safety, accessibility, and correctness.'
-    send: false
+    send: true
   - label: Write Tests
     agent: QA Engineer
     prompt: 'Write Vitest + React Testing Library tests for the code just implemented.'
-    send: false
+    send: true
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+If `$ARGUMENTS` is non-empty, treat its content as the implementation task and begin immediately.
+If `$ARGUMENTS` is empty, ask the user to describe the feature or component to implement.
+
 ---
 
 # React Developer — tih-ui
@@ -44,7 +55,15 @@ npm test                   # run Vitest — confirm no regressions
 
 ## Implementation checklist
 
-Before writing code, re-read the plan provided. If the plan is missing details, conflicts with existing code patterns, or is ambiguous about a step, ask the user for clarification before proceeding. Then work through the following:
+Before writing code, read the following in order:
+
+1. **`.github/copilot-instructions.md`** — React 18 / TypeScript 5 conventions, ESLint strictness, Tailwind token rules, routing patterns, API layer
+2. **`.specify/memory/constitution.md`** — non-negotiable governance principles; any code that violates Principles I–V must be rejected, not worked around
+3. **`.github/instructions/code-style.instructions.md`** — mandatory code-style rules: component declaration, props destructuring, `clsx` usage, import ordering, API `unwrap` pattern, Zustand store shape, TanStack Query conventions — every rule applies, no exceptions
+
+If a plan document is referenced in the task (e.g. `specs/<feature>/plan.md`), read that too.
+
+Then re-read the plan provided. If the plan is missing details, conflicts with existing code patterns, or is ambiguous about a step, ask the user for clarification before proceeding. Then work through the following:
 
 1. **Types first** — add any new interfaces or request shapes to `src/types/index.ts`.
 2. **API layer** — create or extend `src/api/<resource>.ts` using the `unwrap` helper pattern.

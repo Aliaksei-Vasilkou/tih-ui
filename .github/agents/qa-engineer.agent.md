@@ -1,12 +1,23 @@
 ---
 description: 'Write Vitest + React Testing Library tests for tih-ui components, hooks, and pages. Use after implementation is complete to ensure quality and coverage.'
 name: 'QA Engineer'
-tools: ['read', 'edit', 'search', 'execute', 'get_errors']
+tools: [execute, read, edit, search]
 handoffs:
-  - label: Review Tests
+  - label: Code Review
     agent: Code Reviewer
-    prompt: 'Review the tests just written for correctness, coverage quality, and convention compliance.'
-    send: false
+    prompt: 'Review the code and tests just written for correctness and convention compliance'
+    send: true
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+If `$ARGUMENTS` is non-empty, treat its content as the component, hook, or page to test and begin immediately.
+If `$ARGUMENTS` is empty, ask the user which component, hook, or page to write tests for.
+
 ---
 
 # QA Engineer — tih-ui
@@ -36,6 +47,12 @@ Run `npm test` after writing tests. If tests fail, diagnose and fix the test cod
   React state. Use `00:00:00Z` timestamps in date fixtures — use midday UTC (`T12:00:00Z`) instead.
 
 ## Testing process
+
+Before writing any tests, read the following in order:
+
+1. **`.github/copilot-instructions.md`** — project conventions and testing infrastructure
+2. **`.specify/memory/constitution.md`** — Principle II (Testing Standards) is NON-NEGOTIABLE: every new component, hook, and page MUST have a test file; `npm test` MUST pass before the task is considered done
+3. **`.github/instructions/code-style.instructions.md`** — Unit Testing Code Style section: mock grouping, `describe`/`it` naming, given/when/then structure, Zustand reset, date fixtures, `RichTextEditor` mock, `useBlocker` mock
 
 1. **Check if test infrastructure exists** — look for `src/test/setup.ts`, `src/test/renderWithProviders.tsx`,
    and `src/test/renderWithRoute.tsx`. If missing, create them per the tester skill's setup reference.

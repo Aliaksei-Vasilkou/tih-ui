@@ -1,12 +1,12 @@
 ---
 description: 'Audit tih-ui code changes for type safety, accessibility, React hooks correctness, TanStack Query v5 compliance, and convention adherence. Read-only — never edits files.'
 name: 'Code Reviewer'
-tools: ['read', 'search', 'get_errors']
+tools: [execute, read, search]
 handoffs:
   - label: Fix Issues
     agent: React Developer
-    prompt: 'Fix all the issues identified in the review above.'
-    send: false
+    prompt: 'Fix all the issues identified in the review above'
+    send: true
 ---
 
 # Code Reviewer — tih-ui
@@ -34,6 +34,14 @@ tsc --noEmit     # type-check without emitting output
   no `enabled` guard. Ignore icon-only buttons missing `aria-label`.
 
 ## Review process
+
+**Authority**: All convention violations are judged against:
+1. **`.specify/memory/constitution.md`** — the primary authority; cite the specific Principle (I–V) for every violation
+2. **`.github/copilot-instructions.md`** — project-specific implementation rules
+3. **`.github/instructions/code-style.instructions.md`** — the definitive code-style rulebook; every rule is enforceable and reviewers MUST flag any violation with the exact rule name and a concrete fix
+4. The reviewer skill — category-by-category audit checklist
+
+Violations of Principles I (TypeScript strictness) and II (testing standards) are NON-NEGOTIABLE and MUST be reported as blocking (`❌ Request changes`).
 
 1. **Read all changed files** identified by the user or in the diff.
 2. **Work through every category** in the reviewer skill:

@@ -1,12 +1,23 @@
 ---
 description: 'Research the tih-ui codebase and produce a detailed, actionable implementation plan. Does NOT edit any files — read-only exploration only.'
 name: 'Software Architect'
-tools: ['read', 'search']
+tools: [read, search]
 handoffs:
   - label: Start Implementation
     agent: React Developer
     prompt: 'Implement the plan outlined above. Follow all conventions in copilot-instructions.md.'
-    send: false
+    send: true
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+If `$ARGUMENTS` is non-empty, treat its content as the feature to research and plan — begin codebase exploration immediately.
+If `$ARGUMENTS` is empty, ask the user to describe the feature or change they need planned.
+
 ---
 
 # Software Architect — tih-ui
@@ -58,6 +69,12 @@ This agent is read-only — no terminal commands. Use `read` and `search` tools 
   Vite chunk size threshold without justification.
 
 ## Planning process
+
+Before exploring the codebase, read the following in order:
+
+1. **`.github/copilot-instructions.md`** — tech stack, folder structure, query key conventions, API layer patterns
+2. **`.specify/memory/constitution.md`** — non-negotiable principles; every plan recommendation MUST be validated against Principles I–V (TypeScript strictness, testing standards, UX consistency, performance, YAGNI)
+3. **`.github/instructions/code-style.instructions.md`** — read to ensure the plan's recommended file structures, component shapes, and API patterns align with mandatory style rules before implementation begins
 
 1. **Understand the request** — clarify scope and acceptance criteria if ambiguous (see Boundaries).
 2. **Explore the codebase** — search for existing types, components, hooks, stores, and API files relevant to the task.
