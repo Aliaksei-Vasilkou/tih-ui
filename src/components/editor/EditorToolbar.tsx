@@ -592,7 +592,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
   const inTable = editor.isActive('table');
 
   return (
-    <div className="flex flex-col border-b border-border bg-surface-alt rounded-t-lg">
+    <div className="flex flex-col border-b border-border bg-surface-alt rounded-t-lg sticky top-16 z-10">
       {/* ── Row 1: main formatting controls ── */}
       <div className="flex flex-wrap items-center gap-0.5 px-3 py-2">
         {/* 1. Heading style */}
@@ -688,7 +688,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         </ToolbarButton>
       </div>
 
-      {/* ── Row 3: table controls (unchanged) ── */}
+      {/* ── Row 2: table controls ── */}
       {inTable && (
         <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-border bg-primary-50">
           <span className="text-xs text-primary-500 font-medium mr-1">Table:</span>

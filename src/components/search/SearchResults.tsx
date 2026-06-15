@@ -10,9 +10,25 @@ interface SearchResultsProps {
   query: string;
   page: number;
   onPageChange: (page: number) => void;
+  // When true, cards hide language badge, show only level tags, link to /prepare/questions/:id
+  readOnly?: boolean;
+  // When true, cards hide language badge, show only level tags, link to /questions/:id (full-edit route)
+  hideLanguage?: boolean;
+  // When false, cards hide the category badge (use when a specific category is already selected)
+  showCategory?: boolean;
 }
 
-export default function SearchResults({ data, isLoading, isError, query, page, onPageChange }: SearchResultsProps) {
+export default function SearchResults({
+  data,
+  isLoading,
+  isError,
+  query,
+  page,
+  onPageChange,
+  readOnly = false,
+  hideLanguage = false,
+  showCategory = true,
+}: SearchResultsProps) {
   if (isLoading) return <PageLoader message="Searching…" />;
 
   if (isError) {
@@ -48,7 +64,14 @@ export default function SearchResults({ data, isLoading, isError, query, page, o
 
       <div className="space-y-1.5">
         {data.content.map((question) => (
-          <QuestionCard key={question.id} question={question} query={query} />
+          <QuestionCard
+            key={question.id}
+            question={question}
+            query={query}
+            readOnly={readOnly}
+            hideLanguage={hideLanguage}
+            showCategory={showCategory}
+          />
         ))}
       </div>
 

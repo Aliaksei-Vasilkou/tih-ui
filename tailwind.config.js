@@ -75,6 +75,7 @@ export default {
         'toolbar-active-bg': 'var(--color-toolbar-active-bg)',
         'toolbar-active-text': 'var(--color-toolbar-active-text)',
         'diagram-menu-bg': 'var(--color-diagram-menu-bg)',
+        'diagram-bg': 'var(--color-diagram-bg)',
 
         // Unsaved changes indicator
         'unsaved-bg': 'var(--color-unsaved-bg)',

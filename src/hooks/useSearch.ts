@@ -1,17 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { questionsApi } from '@/api/questions';
 import { useDebounce } from './useDebounce';
 
-export function useSearch(query: string, languageId: number | null, categoryId: number | null, page = 0, size = 20) {
+export function useSearch(
+  query: string,
+  languageId: number | null,
+  categoryId: number | null,
+  page = 0,
+  size = 20,
+  tagSlug: string | null = null
+) {
   const debouncedQuery = useDebounce(query, 400);
 
   return useQuery({
-    queryKey: ['questions', 'search', debouncedQuery, languageId, categoryId, page, size],
+    queryKey: ['questions', 'search', debouncedQuery, languageId, categoryId, tagSlug, page, size],
     queryFn: () =>
       questionsApi.search({
         q: debouncedQuery || undefined,
         languageId,
         categoryId,
+        tag: tagSlug ?? undefined,
         page,
         size,
       }),

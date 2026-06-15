@@ -12,6 +12,7 @@ export const questionsApi = {
     q?: string;
     languageId?: number | null;
     categoryId?: number | null;
+    tag?: string | null;
     page?: number;
     size?: number;
   }) => apiClient.get<PageResponse<Question>>('/questions/search', { params }).then(unwrap<PageResponse<Question>>),

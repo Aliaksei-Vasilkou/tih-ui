@@ -58,6 +58,8 @@ export default defineConfig({
             '@tiptap/extension-table-row',
             '@tiptap/extension-table-cell',
             '@tiptap/extension-table-header',
+            '@tiptap/extension-code-block-lowlight',
+            'lowlight',
             'tiptap-markdown',
           ],
           mermaid: ['mermaid'],

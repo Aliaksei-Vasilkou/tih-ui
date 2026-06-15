@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { languagesApi } from '@/api/languages';
 import { useFilterStore } from '@/store/filterStore';
 import Select from '@/components/common/Select';
 
-export default function LanguageSelector() {
+interface LanguageSelectorProps {
+  disabled?: boolean;
+}
+
+export default function LanguageSelector({ disabled = false }: LanguageSelectorProps) {
   const { selectedLanguageId, setLanguage, reset } = useFilterStore();
 
   const { data: languages = [] } = useQuery({
@@ -31,6 +36,7 @@ export default function LanguageSelector() {
       placeholder="All Languages"
       size="sm"
       className="min-w-[140px]"
+      disabled={disabled}
     />
   );
 }

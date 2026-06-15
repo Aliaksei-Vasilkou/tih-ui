@@ -1,16 +1,14 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import clsx from 'clsx';
+
 import { questionsApi } from '@/api/questions';
 import MarkdownViewer from '@/components/common/MarkdownViewer';
 import BackButton from '@/components/common/BackButton';
 import PageLoader from '@/components/common/PageLoader';
 import PageError from '@/components/common/PageError';
-import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import { Pencil, Trash2, Loader2 } from 'lucide-react';
 import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '@/constants/languageColors';
 import { formatDate } from '@/utils/format';
-import clsx from 'clsx';
 
 const LEVEL_TAG_RE = /^L[1-4]$/i;
 
@@ -24,11 +22,8 @@ function sortTags(tags: string[]): string[] {
   });
 }
 
-export default function QuestionDetailPage() {
+export default function PrepareQuestionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const {
     data: question,
@@ -40,14 +35,6 @@ export default function QuestionDetailPage() {
     enabled: Boolean(id),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: () => questionsApi.delete(Number(id)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      navigate('/manage');
-    },
-  });
-
   if (isLoading) return <PageLoader />;
   if (isError || !question) return <PageError message="Question not found." />;
 
@@ -56,27 +43,7 @@ export default function QuestionDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <BackButton label="Back to search" />
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/questions/${question.id}/edit`)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border-strong
-                       rounded-lg text-muted hover:bg-surface-alt transition-colors"
-          >
-            <Pencil className="w-4 h-4" /> Edit
-          </button>
-          <button
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={deleteMutation.isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-error-light
-                       rounded-lg text-error hover:bg-error-bg transition-colors disabled:opacity-50"
-          >
-            {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            Delete
-          </button>
-        </div>
-      </div>
+      <BackButton label="Back to prepare" />
 
       <div className="bg-surface rounded-2xl border border-border shadow-theme-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-border">
@@ -91,7 +58,9 @@ export default function QuestionDetailPage() {
             </div>
             {sortedTags.length > 0 && (
               <div className="flex flex-wrap items-center justify-end gap-1.5">
-                <span className="text-[10px] text-muted-light font-small">Tags:</span>
+                <span className={clsx('text-[10px] text-muted-light')} aria-hidden="true">
+                  Tags:
+                </span>
                 {sortedTags.map((tag) => (
                   <span key={tag} className="tag">
                     {tag}
@@ -117,15 +86,6 @@ export default function QuestionDetailPage() {
           <span>{formatDate(question.createdAt)}</span>
         </div>
       </div>
-
-      {showDeleteDialog && (
-        <DeleteConfirmDialog
-          itemLabel="this question"
-          isDeleting={deleteMutation.isPending}
-          onConfirm={() => deleteMutation.mutate()}
-          onCancel={() => setShowDeleteDialog(false)}
-        />
-      )}
     </div>
   );
 }

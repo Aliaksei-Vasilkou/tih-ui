@@ -43,8 +43,8 @@
   --color-badge-category-text: #4b5563;
   --color-code-inline-bg: #f3f4f6;
   --color-code-inline-text: #dc2626;
-  --color-code-block-bg: #111827;
-  --color-code-block-text: #f3f4f6;
+  --color-code-block-bg: #f6f8fa;
+  --color-code-block-text: #24292e;
   --color-blockquote-border: #60a5fa;
   --color-blockquote-text: #4b5563;
   --color-divider: #d1d5db;
@@ -58,6 +58,7 @@
   --color-toolbar-active-bg: #dbeafe;
   --color-toolbar-active-text: #1d4ed8;
   --color-diagram-menu-bg: #ffffff;
+  --color-diagram-bg: #ffffff;
   --color-unsaved-bg: #fffbeb;
   --color-unsaved-border: #fde68a;
   --color-unsaved-text: #92400e;
@@ -69,6 +70,15 @@
   --color-highlight-purple: #e9d5ff;
   /* Text drawn inside any <mark> — must contrast against the highlight bg */
   --color-highlight-text: #111827;
+  /* hljs syntax token colours — GitHub-light defaults (dark themes override via JSON) */
+  --color-hljs-comment: #6a737d;
+  --color-hljs-keyword: #d73a49;
+  --color-hljs-deletion: #d73a49;
+  --color-hljs-literal: #005cc5;
+  --color-hljs-string: #032f62;
+  --color-hljs-number: #005cc5;
+  --color-hljs-title: #6f42c1;
+  --color-hljs-builtin: #e36209;
 }
 
 @layer base {
@@ -129,10 +139,78 @@
   @apply bg-code-inline-bg text-code-inline-text text-sm px-1.5 py-0.5 rounded font-mono;
 }
 .tiptap-content pre {
-  @apply bg-code-block-bg text-code-block-text rounded-lg p-4 overflow-x-auto mb-4 text-sm;
+  @apply bg-code-block-bg text-code-block-text rounded-lg p-4 overflow-x-auto mb-4 text-sm border border-border-strong;
 }
 .tiptap-content pre code {
   @apply bg-transparent text-code-block-text p-0 text-sm font-mono;
+}
+
+/* ── Shared code block styling for MarkdownViewer ── */
+.md-code-block {
+  @apply bg-code-block-bg text-code-block-text rounded-lg p-4 overflow-x-auto mb-4 text-sm border border-border-strong;
+}
+.md-code-block code {
+  @apply bg-transparent text-code-block-text p-0 text-sm font-mono;
+}
+
+/* ── Syntax-highlighting token colours — uses CSS vars so themes can override ── */
+.hljs-comment,
+.hljs-quote {
+  color: var(--color-hljs-comment);
+  font-style: italic;
+}
+.hljs-doctag,
+.hljs-formula,
+.hljs-keyword {
+  color: var(--color-hljs-keyword);
+}
+.hljs-deletion,
+.hljs-name,
+.hljs-section,
+.hljs-selector-tag,
+.hljs-subst {
+  color: var(--color-hljs-deletion);
+}
+.hljs-literal {
+  color: var(--color-hljs-literal);
+}
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string,
+.hljs-regexp,
+.hljs-string {
+  color: var(--color-hljs-string);
+}
+.hljs-attr,
+.hljs-number,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-pseudo,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable {
+  color: var(--color-hljs-number);
+}
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-symbol,
+.hljs-title {
+  color: var(--color-hljs-title);
+}
+.hljs-built_in,
+.hljs-title.class_ {
+  color: var(--color-hljs-builtin);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
+.hljs-link {
+  text-decoration: underline;
 }
 .tiptap-content blockquote {
   @apply border-l-4 border-blockquote-border pl-4 italic text-blockquote-text mb-3
@@ -219,6 +297,11 @@
 }
 .md-content a {
   @apply text-primary-600 underline hover:text-primary-700 transition-colors;
+}
+/* Inline code — matches the editor style exactly for WYSIWYG consistency */
+.md-content :not(pre) > code,
+.md-inline-code {
+  @apply bg-code-inline-bg text-code-inline-text text-sm px-1.5 py-0.5 rounded font-mono;
 }
 .md-content mark {
   /* !important beats TipTap's inline "color: inherit" */

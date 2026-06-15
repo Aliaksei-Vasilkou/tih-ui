@@ -1,18 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Loader2, Pencil, Settings2 } from 'lucide-react';
 import { useNavigate, useBlocker } from 'react-router-dom';
+
+import type { Category, Language, Question, QuestionCreateRequest, Tag } from '@/types';
 import { languagesApi } from '@/api/languages';
 import { categoriesApi } from '@/api/categories';
 import { tagsApi } from '@/api/tags';
 import { questionsApi } from '@/api/questions';
-import type { Question, QuestionCreateRequest, Language, Category, Tag } from '@/types';
 import RichTextEditor from '@/components/editor/RichTextEditor';
-import ManageLanguagesModal from '@/components/common/ManageLanguagesModal';
 import ManageCategoriesModal from '@/components/common/ManageCategoriesModal';
+import ManageLanguagesModal from '@/components/common/ManageLanguagesModal';
 import TagPickerModal from '@/components/common/TagPickerModal';
 import Select from '@/components/common/Select';
 import UnsavedChangesDialog from '@/components/common/UnsavedChangesDialog';
-import { Loader2, Pencil, Settings2 } from 'lucide-react';
+import { sortTags } from '@/utils/tagOrdering';
 
 interface QuestionFormProps {
   initialData?: Question;
@@ -142,7 +145,7 @@ export default function QuestionForm({ initialData, title }: QuestionFormProps) 
     queryClient.invalidateQueries({ queryKey: ['tags', languageId] });
   };
 
-  const selectedTags = availableTags.filter((t) => selectedTagIds.includes(t.id));
+  const selectedTags = sortTags(availableTags.filter((tag) => selectedTagIds.includes(tag.id)));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

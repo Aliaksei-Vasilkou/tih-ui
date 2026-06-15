@@ -54,6 +54,7 @@
     "color-toolbar-active-bg": "#383820",
     "color-toolbar-active-text": "#a6e22e",
     "color-diagram-menu-bg": "#3e3d32",
+    "color-diagram-bg": "#ffffff",
     "color-unsaved-bg": "#3a2a00",
     "color-unsaved-border": "#7a5a00",
     "color-unsaved-text": "#e6db74",
@@ -66,6 +67,14 @@
     "color-text-red":    "#f92672",
     "color-text-green":  "#a6e22e",
     "color-text-blue":   "#66d9ef",
-    "color-text-violet": "#ae81ff"
+    "color-text-violet": "#ae81ff",
+    "color-hljs-comment": "#75715e",
+    "color-hljs-keyword": "#f92672",
+    "color-hljs-deletion": "#f92672",
+    "color-hljs-literal": "#ae81ff",
+    "color-hljs-string": "#e6db74",
+    "color-hljs-number": "#ae81ff",
+    "color-hljs-title": "#a6e22e",
+    "color-hljs-builtin": "#66d9e8"
   }
 }

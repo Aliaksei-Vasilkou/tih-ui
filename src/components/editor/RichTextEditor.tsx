@@ -1,5 +1,8 @@
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { lowlight } from 'lowlight';
+import CodeBlockNodeView from './CodeBlockNodeView';
 import Highlight from '@tiptap/extension-highlight';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
@@ -30,7 +33,12 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ codeBlock: false }),
+      CodeBlockLowlight.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockNodeView);
+        },
+      }).configure({ lowlight, defaultLanguage: null }),
       Underline,
       TextStyle,
       Color,
@@ -62,13 +70,15 @@ export default function RichTextEditor({
   return (
     <div
       className={clsx(
-        'rounded-lg border border-border-strong bg-surface overflow-hidden',
+        'rounded-lg border border-border-strong bg-surface',
         !readOnly && 'focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-border-focus',
         className
       )}
     >
       {!readOnly && editor && <EditorToolbar editor={editor} />}
-      <EditorContent editor={editor} />
+      <div className="overflow-y-auto">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }

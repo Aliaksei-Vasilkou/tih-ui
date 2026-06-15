@@ -1,22 +1,21 @@
 import { useSearchParams } from 'react-router-dom';
+
 import SearchBox from '@/components/search/SearchBox';
 import SearchResults from '@/components/search/SearchResults';
 import FilterPanel from '@/components/common/FilterPanel';
-import BatchUpload from '@/components/common/BatchUpload';
-import BatchExport from '@/components/common/BatchExport';
 import { useFilterStore } from '@/store/filterStore';
-import { useUIStore } from '@/store/uiStore';
 import { useSearch } from '@/hooks/useSearch';
 
-export default function SearchPage() {
+export default function PreparePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
   const page = Number(searchParams.get('page') ?? '0');
+  const levelTag = searchParams.get('level');
 
   const { selectedLanguageId, selectedCategoryId } = useFilterStore();
-  const { showUpload, showExport } = useUIStore();
+  const showCategory = selectedCategoryId === null;
 
-  const { data, isLoading, isError } = useSearch(query, selectedLanguageId, selectedCategoryId, page);
+  const { data, isLoading, isError } = useSearch(query, selectedLanguageId, selectedCategoryId, page, 20, levelTag);
 
   const handleQueryChange = (val: string) => {
     setSearchParams(
@@ -47,21 +46,7 @@ export default function SearchPage() {
     <div className="space-y-5">
       <SearchBox value={query} onChange={handleQueryChange} />
 
-      {showUpload && (
-        <div className="bg-surface rounded-xl border border-border p-5 shadow-theme-sm">
-          <h2 className="text-base font-semibold text-foreground mb-4">Batch Import Questions</h2>
-          <BatchUpload />
-        </div>
-      )}
-
-      {showExport && (
-        <div className="bg-surface rounded-xl border border-border p-5 shadow-theme-sm">
-          <h2 className="text-base font-semibold text-foreground mb-4">Export Questions</h2>
-          <BatchExport />
-        </div>
-      )}
-
-      <FilterPanel onCategoryChange={() => handlePageChange(0)} />
+      <FilterPanel onCategoryChange={() => handlePageChange(0)} allBold />
 
       <SearchResults
         data={data}
@@ -70,6 +55,8 @@ export default function SearchPage() {
         query={query}
         page={page}
         onPageChange={handlePageChange}
+        readOnly
+        showCategory={showCategory}
       />
     </div>
   );

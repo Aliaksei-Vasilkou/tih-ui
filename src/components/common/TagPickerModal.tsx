@@ -1,8 +1,12 @@
 import { useState } from 'react';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Check, Loader2, Pencil, Plus, X } from 'lucide-react';
+
 import { tagsApi } from '@/api/tags';
 import type { Tag, TagCreateRequest } from '@/types';
-import { Plus, Pencil, Loader2, Check, X } from 'lucide-react';
+import { sortTags } from '@/utils/tagOrdering';
+
 import ModalShell from './ModalShell';
 
 interface Props {
@@ -25,6 +29,8 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
     queryFn: () => tagsApi.getAll(languageId),
     enabled: Boolean(languageId),
   });
+
+  const orderedTags = sortTags(tags);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tags'] });
 
@@ -124,7 +130,7 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
               />
             )}
 
-            {tags.map((tag) =>
+            {orderedTags.map((tag) =>
               editingId === tag.id ? (
                 <InlineChipForm
                   key={tag.id}
@@ -161,7 +167,7 @@ export default function TagPickerModal({ languageId, selectedTagIds, onClose }: 
               )
             )}
 
-            {tags.length === 0 && !showAdd && (
+            {orderedTags.length === 0 && !showAdd && (
               <p className="text-sm text-muted-light">
                 No tags yet — click <strong>+</strong> to add the first one.
               </p>

@@ -3,7 +3,8 @@ description: Identify underspecified areas in the current feature spec by asking
 handoffs: 
   - label: Build Technical Plan
     agent: speckit.plan
-    prompt: Create a plan for the spec. I am building with...
+    prompt: Create a plan for the spec based on the clarified spec details
+    send: true
 ---
 
 ## User Input

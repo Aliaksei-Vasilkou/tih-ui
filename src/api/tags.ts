@@ -1,11 +1,15 @@
 import type { AxiosResponse } from 'axios';
-import apiClient from './client';
+
 import type { Tag, TagCreateRequest } from '@/types';
+import { sortTags } from '@/utils/tagOrdering';
+
+import apiClient from './client';
 
 const unwrap = <T>(r: AxiosResponse<T>) => r.data;
 
 export const tagsApi = {
-  getAll: (languageId: number) => apiClient.get<Tag[]>(`/languages/${languageId}/tags`).then(unwrap<Tag[]>),
+  getAll: (languageId: number) =>
+    apiClient.get<Tag[]>(`/languages/${languageId}/tags`).then(unwrap<Tag[]>).then(sortTags),
 
   create: (languageId: number, data: TagCreateRequest) =>
     apiClient.post<Tag>(`/languages/${languageId}/tags`, data).then(unwrap<Tag>),

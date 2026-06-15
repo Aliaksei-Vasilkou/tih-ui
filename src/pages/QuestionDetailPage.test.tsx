@@ -4,7 +4,16 @@ import userEvent from '@testing-library/user-event';
 import { renderWithRoute } from '@/test/renderWithRoute';
 import QuestionDetailPage from './QuestionDetailPage';
 
+const navigateMock = vi.fn();
+
 vi.mock('@/api/questions');
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
 vi.mock('@/components/common/MarkdownViewer', () => ({
   default: ({ content }: { content: string }) => <div data-testid="markdown-viewer">{content}</div>,
 }));
@@ -30,6 +39,7 @@ function makeQuestion(overrides = {}) {
 }
 
 beforeEach(() => {
+  navigateMock.mockReset();
   vi.mocked(questionsApi.getById).mockResolvedValue(makeQuestion());
   vi.mocked(questionsApi.delete).mockResolvedValue(undefined as never);
 });
@@ -173,5 +183,24 @@ describe('QuestionDetailPage', () => {
     await user.click(dialogDeleteBtn);
 
     await waitFor(() => expect(questionsApi.delete).toHaveBeenCalledWith(1));
+  });
+
+  it('should navigate back to manage page after successful delete', async () => {
+    const user = userEvent.setup();
+    renderWithRoute(<QuestionDetailPage />, {
+      path: '/questions/:id',
+      initialEntry: '/questions/1',
+    });
+    await waitFor(() => expect(screen.getByText('What is a closure?')).toBeInTheDocument());
+
+    const pageDeleteBtn = screen.getByRole('button', { name: /delete/i });
+    await user.click(pageDeleteBtn);
+    await waitFor(() => expect(screen.getByText(/are you sure/i)).toBeInTheDocument());
+
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    const dialogDeleteBtn = deleteButtons[1];
+    await user.click(dialogDeleteBtn);
+
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/manage'));
   });
 });

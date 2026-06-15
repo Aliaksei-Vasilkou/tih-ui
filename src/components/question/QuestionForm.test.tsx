@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { renderWithProviders } from '@/test/renderWithProviders';
+
 import QuestionForm from './QuestionForm';
 
 vi.mock('@/api/questions');
@@ -243,6 +245,53 @@ describe('QuestionForm', () => {
 
       await user.type(screen.getByPlaceholderText(/enter the interview question/i), 'A');
       expect(screen.getByText(/unsaved/i)).toBeInTheDocument();
+    });
+
+    it('should order available tags with level tags first and all others alphabetically in the picker', async () => {
+      const user = userEvent.setup();
+      vi.mocked(tagsApi.getAll).mockResolvedValue([
+        { id: 2, name: 'beginner', languageId: 1, languageName: 'JavaScript', languageCode: 'javascript' },
+        { id: 4, name: 'algorithms', languageId: 1, languageName: 'JavaScript', languageCode: 'javascript' },
+        { id: 3, name: 'L3', languageId: 1, languageName: 'JavaScript', languageCode: 'javascript' },
+        { id: 1, name: 'L1', languageId: 1, languageName: 'JavaScript', languageCode: 'javascript' },
+      ]);
+
+      renderWithProviders(
+        <QuestionForm
+          initialData={{
+            id: 5,
+            questionText: 'Existing question',
+            answerContent: 'Answer',
+            languageId: 1,
+            languageName: 'JavaScript',
+            languageCode: 'javascript',
+            categoryId: 10,
+            categoryName: 'Functions',
+            tags: ['L1'],
+            createdAt: '2024-01-01T00:00:00Z',
+            updatedAt: '2024-01-01T00:00:00Z',
+            createdBy: 'admin',
+          }}
+          title="Edit Question"
+        />,
+        {
+          initialEntries: ['/questions/5/edit'],
+        }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Existing question')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTitle(/manage tags/i));
+
+      await waitFor(() => {
+        const tagTexts = Array.from(document.querySelectorAll('.tag-selected, .tag-interactive')).map((element) =>
+          element.textContent?.trim()
+        );
+
+        expect(tagTexts).toEqual(['L1', 'L3', 'algorithms', 'beginner']);
+      });
     });
   });
 

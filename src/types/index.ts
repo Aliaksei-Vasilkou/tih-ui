@@ -100,6 +100,28 @@ export interface QuestionTransferItem {
 }
 
 // ──────────────────────────────────────────────
+// UI — Home screen mode definitions
+// ──────────────────────────────────────────────
+
+import type { ComponentType } from 'react';
+
+export type LevelTag = 'L1' | 'L2' | 'L3' | 'L4';
+
+export interface LevelOption {
+  label: string;
+  tag: LevelTag | null;
+}
+
+export interface ModeDefinition {
+  id: string;
+  title: string;
+  description: string;
+  icon: ComponentType<{ className?: string }>;
+  route: string;
+  status: 'active' | 'coming-soon';
+}
+
+// ──────────────────────────────────────────────
 // UI state
 // ──────────────────────────────────────────────
 
