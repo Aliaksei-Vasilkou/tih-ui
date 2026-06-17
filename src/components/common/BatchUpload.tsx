@@ -1,10 +1,18 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { questionsApi } from '@/api/questions';
-import type { BatchUploadResponse } from '@/types';
-import { UploadCloud, FileJson, CheckCircle2, XCircle, SkipForward, Loader2, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
+import { AlertCircle, CheckCircle2, FileJson, Loader2, SkipForward, UploadCloud, XCircle } from 'lucide-react';
+
+import type {
+  BatchAnalyseResponse,
+  BatchCommitRequest,
+  BatchUploadResponse,
+  DuplicateConflict,
+  DuplicateResolution,
+} from '@/types';
+import { questionsApi } from '@/api/questions';
+import DuplicateReviewModal from '@/components/common/DuplicateReviewModal';
 
 /**
  * react-dropzone checks both MIME type and extension.
@@ -19,48 +27,189 @@ const ACCEPT_JSON = {
   'text/plain': ['.json'],
 };
 
+function mergeBatchUploadResults(current: BatchUploadResponse | null, next: BatchUploadResponse): BatchUploadResponse {
+  if (!current) {
+    return next;
+  }
+
+  return {
+    totalItems: current.totalItems + next.totalItems,
+    successCount: current.successCount + next.successCount,
+    updatedCount: current.updatedCount + next.updatedCount,
+    failureCount: current.failureCount + next.failureCount,
+    skippedCount: current.skippedCount + next.skippedCount,
+    errors: [...current.errors, ...next.errors],
+    skipped: [...current.skipped, ...next.skipped],
+  };
+}
+
+function skippedSingleResult(extId: string): BatchUploadResponse {
+  return {
+    totalItems: 1,
+    successCount: 0,
+    updatedCount: 0,
+    failureCount: 0,
+    skippedCount: 1,
+    errors: [],
+    skipped: [extId],
+  };
+}
+
 export default function BatchUpload() {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<BatchUploadResponse | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<'idle' | 'analysing' | 'reviewing' | 'committing' | 'done'>('idle');
+  const [conflicts, setConflicts] = useState<DuplicateConflict[]>([]);
+  const [reviewIndex, setReviewIndex] = useState(0);
 
-  const mutation = useMutation<BatchUploadResponse, Error, File>({
-    mutationFn: (file: File) => questionsApi.batchUpload(file),
+  const commitMutation = useMutation<BatchUploadResponse, Error, BatchCommitRequest>({
+    mutationFn: (payload: BatchCommitRequest) => questionsApi.batchCommit(payload),
+  });
+
+  const analyseMutation = useMutation<BatchAnalyseResponse, Error, File>({
+    mutationFn: (file: File) => questionsApi.batchAnalyse(file),
     onSuccess: (data) => {
-      setResult(data);
       setUploadError(null);
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      setConflicts(data.duplicates);
+      setReviewIndex(0);
+      setResult(null);
+
+      if (data.newItems.length > 0) {
+        setPhase('committing');
+        commitMutation.mutate(
+          {
+            newItems: data.newItems,
+            resolutions: [],
+          },
+          {
+            onSuccess: (commitResult) => {
+              setResult(commitResult);
+              queryClient.invalidateQueries({ queryKey: ['questions'] });
+
+              if (data.duplicates.length > 0) {
+                setPhase('reviewing');
+                return;
+              }
+
+              setPhase('done');
+              setConflicts([]);
+              setReviewIndex(0);
+            },
+            onError: (err: Error) => {
+              setResult(null);
+              setUploadError(err.message);
+              setPhase('idle');
+            },
+          }
+        );
+        return;
+      }
+
+      if (data.duplicates.length === 0) {
+        setPhase('done');
+        return;
+      }
+
+      setPhase('reviewing');
     },
     onError: (err: Error) => {
       setResult(null);
       setUploadError(err.message);
+      setPhase('idle');
     },
   });
+
+  const isBusy = analyseMutation.isPending || commitMutation.isPending;
+
+  const currentConflict = phase === 'reviewing' ? conflicts[reviewIndex] : undefined;
 
   const onDrop = useCallback(
     (accepted: File[]) => {
       if (accepted[0]) {
         setResult(null);
         setUploadError(null);
-        mutation.mutate(accepted[0]);
+        setPhase('analysing');
+        setConflicts([]);
+        setReviewIndex(0);
+        analyseMutation.mutate(accepted[0]);
       }
     },
-    [mutation]
+    [analyseMutation]
   );
 
   const onDropRejected = useCallback(() => {
     setUploadError('File rejected. Please select a valid .json file.');
+    setPhase('idle');
   }, []);
+
+  const closeReview = useCallback(() => {
+    setPhase('idle');
+    setConflicts([]);
+    setReviewIndex(0);
+  }, []);
+
+  const moveToNextConflictOrDone = useCallback(() => {
+    const hasNext = reviewIndex < conflicts.length - 1;
+    if (hasNext) {
+      setReviewIndex((current) => current + 1);
+      return;
+    }
+
+    setPhase('done');
+    setConflicts([]);
+    setReviewIndex(0);
+  }, [conflicts.length, reviewIndex]);
+
+  const resolveCurrentConflict = useCallback(
+    (action: DuplicateResolution) => {
+      if (!currentConflict) {
+        return;
+      }
+
+      if (action === 'skip') {
+        setResult((current) => mergeBatchUploadResults(current, skippedSingleResult(currentConflict.extId)));
+        moveToNextConflictOrDone();
+        return;
+      }
+
+      commitMutation.mutate(
+        {
+          newItems: [currentConflict.incoming],
+          resolutions: [{ extId: currentConflict.extId, action: 'accept' }],
+        },
+        {
+          onSuccess: (commitResult) => {
+            setUploadError(null);
+            setResult((current) => mergeBatchUploadResults(current, commitResult));
+            queryClient.invalidateQueries({ queryKey: ['questions'] });
+            moveToNextConflictOrDone();
+          },
+          onError: (err: Error) => {
+            setUploadError(err.message);
+          },
+        }
+      );
+    },
+    [commitMutation, currentConflict, moveToNextConflictOrDone, queryClient]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     onDropRejected,
     accept: ACCEPT_JSON,
     maxFiles: 1,
-    disabled: mutation.isPending,
+    disabled: isBusy || phase === 'reviewing',
   });
 
   const allOk = result && result.failureCount === 0 && result.skippedCount === 0;
+  let uploadLabel = 'Drop a JSON file here';
+  if (phase === 'analysing') {
+    uploadLabel = 'Analysing duplicates…';
+  }
+  if (phase === 'committing') {
+    uploadLabel = 'Committing import…';
+  }
 
   return (
     <div className="space-y-4">
@@ -71,20 +220,18 @@ export default function BatchUpload() {
           isDragActive
             ? 'border-primary-500 bg-primary-50'
             : 'border-border-strong bg-surface-alt hover:border-primary-400 hover:bg-primary-50',
-          mutation.isPending && 'pointer-events-none opacity-60'
+          (isBusy || phase === 'reviewing') && 'pointer-events-none opacity-60'
         )}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center gap-3 text-muted">
-          {mutation.isPending ? (
+          {isBusy ? (
             <Loader2 className="w-10 h-10 animate-spin text-primary-500" />
           ) : (
             <UploadCloud className="w-10 h-10 text-primary-400" />
           )}
           <div>
-            <p className="font-medium text-foreground-secondary">
-              {mutation.isPending ? 'Uploading…' : 'Drop a JSON file here'}
-            </p>
+            <p className="font-medium text-foreground-secondary">{uploadLabel}</p>
             <p className="text-sm mt-0.5">or click to browse</p>
           </div>
           <div className="flex items-center gap-1 text-xs bg-surface border border-border rounded px-2 py-1">
@@ -126,7 +273,7 @@ export default function BatchUpload() {
             </thead>
             <tbody className="text-muted divide-y divide-border">
               {[
-                ['extId', 'No', 'Stable external ID for deduplication — re-importing the same ID skips the row'],
+                ['extId', 'No', 'Stable external ID for deduplication and duplicate-review matching'],
                 ['question', 'Yes', 'Plain text of the interview question'],
                 ['answer', 'No', 'Markdown answer body — supports tables, code blocks, headings, bold, etc.'],
                 ['language', 'Yes', 'Language code that must already exist (e.g. java, typescript)'],
@@ -155,6 +302,7 @@ export default function BatchUpload() {
             {allOk ? <CheckCircle2 className="w-5 h-5 text-success" /> : <XCircle className="w-5 h-5 text-warning" />}
             <span>
               {result.successCount} of {result.totalItems} imported
+              {result.updatedCount > 0 && `, ${result.updatedCount} updated`}
               {result.skippedCount > 0 && `, ${result.skippedCount} skipped`}
               {result.failureCount > 0 && `, ${result.failureCount} failed`}
             </span>
@@ -175,7 +323,7 @@ export default function BatchUpload() {
             <div>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-warning uppercase tracking-wide mb-1">
                 <SkipForward className="w-3.5 h-3.5" />
-                Skipped (already exist)
+                Skipped duplicates
               </div>
               <ul className="text-sm text-warning list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto">
                 {result.skipped.map((s, i) => (
@@ -185,6 +333,18 @@ export default function BatchUpload() {
             </div>
           )}
         </div>
+      )}
+
+      {currentConflict && (
+        <DuplicateReviewModal
+          conflict={currentConflict}
+          currentIndex={reviewIndex + 1}
+          totalConflicts={conflicts.length}
+          isSubmitting={commitMutation.isPending}
+          onAccept={() => resolveCurrentConflict('accept')}
+          onSkip={() => resolveCurrentConflict('skip')}
+          onClose={closeReview}
+        />
       )}
     </div>
   );

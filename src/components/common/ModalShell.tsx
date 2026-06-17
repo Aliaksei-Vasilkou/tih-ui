@@ -1,11 +1,13 @@
 import { X } from 'lucide-react';
 
-type ModalWidth = 'sm' | 'md' | 'lg';
+type ModalWidth = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 const widthClass: Record<ModalWidth, string> = {
   sm: 'max-w-sm',
   md: 'max-w-md',
   lg: 'max-w-lg',
+  xl: 'max-w-5xl',
+  '2xl': 'max-w-7xl',
 };
 
 interface ModalShellProps {

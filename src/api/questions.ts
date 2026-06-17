@@ -1,6 +1,13 @@
 import type { AxiosResponse } from 'axios';
 import apiClient from './client';
-import type { Question, QuestionCreateRequest, PageResponse, BatchUploadResponse } from '@/types';
+import type {
+  BatchAnalyseResponse,
+  BatchCommitRequest,
+  BatchUploadResponse,
+  PageResponse,
+  Question,
+  QuestionCreateRequest,
+} from '@/types';
 
 const unwrap = <T>(r: AxiosResponse<T>) => r.data;
 
@@ -35,6 +42,19 @@ export const questionsApi = {
       })
       .then(unwrap<BatchUploadResponse>);
   },
+
+  batchAnalyse: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiClient
+      .post<BatchAnalyseResponse>('/batch/analyse', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then(unwrap<BatchAnalyseResponse>);
+  },
+
+  batchCommit: (data: BatchCommitRequest) =>
+    apiClient.post<BatchUploadResponse>('/batch/commit', data).then(unwrap<BatchUploadResponse>),
 
   batchExport: (params?: { languageCode?: string; categoryName?: string }) =>
     apiClient.get('/batch/export', { params, responseType: 'blob' }).then((response) => {

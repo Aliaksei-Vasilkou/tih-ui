@@ -83,6 +83,7 @@ export interface TagCreateRequest {
 export interface BatchUploadResponse {
   totalItems: number;
   successCount: number;
+  updatedCount: number;
   failureCount: number;
   skippedCount: number;
   errors: string[];
@@ -97,6 +98,27 @@ export interface QuestionTransferItem {
   language: string;
   category: string;
   tags: string[];
+}
+
+export interface DuplicateConflict {
+  extId: string;
+  existing: Question;
+  incoming: QuestionTransferItem;
+}
+
+export type DuplicateResolution = 'accept' | 'skip';
+
+export interface BatchAnalyseResponse {
+  newItems: QuestionTransferItem[];
+  duplicates: DuplicateConflict[];
+}
+
+export interface BatchCommitRequest {
+  newItems: QuestionTransferItem[];
+  resolutions: Array<{
+    extId: string;
+    action: DuplicateResolution;
+  }>;
 }
 
 // ──────────────────────────────────────────────
